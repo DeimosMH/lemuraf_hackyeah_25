@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odyssey: Dashboard - The Life Navigation RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 40vh;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 50vh;
+            }
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            color: #0ea5e9;
+            border-bottom-color: #0ea5e9;
+        }
+        .tooltip-custom {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted #475569;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="app-container" class="min-h-screen">
+
+        <header class="bg-white shadow-sm sticky top-0 z-10">
+            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <a href="index.html" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                            <span class="text-2xl font-bold text-sky-600">O</span>
+                            <h1 class="text-xl font-bold text-slate-800">Odyssey</h1>
+                        </a>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="dashboard.html" class="nav-link text-sky-500 border-b-2 border-sky-500 pb-1 font-semibold" data-section="dashboard">Dashboard</a>
+                        <a href="logistics.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="logistics">Logistics</a>
+                        <a href="simulator.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="simulator">Simulator</a>
+                        <a href="community.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="community">Community</a>
+                    </div>
+                    <div class="md:hidden">
+                         <button id="mobile-menu-button" class="text-slate-600 hover:text-sky-500">
+                             <span class="text-xl">☰</span>
+                         </button>
+                    </div>
+                </div>
+                 <div id="mobile-menu" class="md:hidden hidden flex flex-col space-y-2 pb-4">
+                    <a href="dashboard.html" class="nav-link text-sky-500 block px-2 py-1 font-semibold" data-section="dashboard">Dashboard</a>
+                    <a href="logistics.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="logistics">Logistics</a>
+                    <a href="simulator.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="simulator">Simulator</a>
+                    <a href="community.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="community">Community</a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <section id="dashboard" class="app-section">
+                <p class="text-slate-500 mb-6">The Dashboard is your <strong>Integrated Life OS</strong>, unifying transport, health, and social achievements into a single gamified interface. Completing the daily <strong>Quests</strong> drives progression.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h2 class="text-2xl font-bold mb-1">Character Sheet: Advanced Metrics</h2>
+                            <p class="text-slate-500 mb-4">This is your core self. Improvements here are calculated using <strong>Impact Weights (0.1-1.0)</strong>, <strong>Habit Streaks</strong>, and <strong>Diminishing Returns</strong> for realistic progression.</p>
+
+                            <!-- Advanced Stats Overview -->
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                <div class="bg-slate-50 p-3 rounded-lg text-center">
+                                    <div class="text-2xl font-bold text-sky-600" id="overall-level">12</div>
+                                    <div class="text-xs text-slate-500">Overall Level</div>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-lg text-center">
+                                    <div class="text-2xl font-bold text-emerald-600" id="active-streaks">3</div>
+                                    <div class="text-xs text-slate-500">Active Streaks</div>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-lg text-center">
+                                    <div class="text-2xl font-bold text-amber-600" id="weekly-xp-gain">245</div>
+                                    <div class="text-xs text-slate-500">Weekly XP</div>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-lg text-center">
+                                    <div class="text-2xl font-bold text-purple-600" id="stat-efficiency">87%</div>
+                                    <div class="text-xs text-slate-500">Efficiency</div>
+                                </div>
+                            </div>
+
+                            <!-- Main Stats Chart -->
+                            <div class="chart-container max-w-lg mx-auto mb-6">
+                                <canvas id="statsChart"></canvas>
+                            </div>
+
+                            <!-- Detailed Stats Breakdown -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="detailed-stats">
+                                <!-- Detailed stats will be populated by JavaScript -->
+                            </div>
+
+                            <!-- Recent Activity & Trends -->
+                            <div class="mt-6 pt-4 border-t border-slate-200">
+                                <h4 class="font-semibold mb-3 text-slate-700">Recent Activity & Trends</h4>
+                                <div class="space-y-2" id="recent-activities">
+                                    <!-- Recent activities will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 id="char-level" class="text-lg font-bold">Alex <span class="text-sm font-medium text-slate-500">Lv. 12</span></h3>
+                                    <p class="text-xs font-bold text-amber-600 mt-1">Evasion Points: <span id="evasion-points">0</span></p>
+                                    <p class="text-xs font-bold text-purple-600 mt-1">Habit Streaks: <span id="active-streaks-display">3</span></p>
+                                </div>
+                                <div class="text-right">
+                                      <p class="text-lg font-bold text-yellow-500 tooltip-custom" title="Acquired by improving PROSPERITY and completing financial quests">
+                                         <span id="char-gold">150</span> G
+                                      </p>
+                                </div>
+                            </div>
+
+                            <!-- XP Section with Advanced Metrics -->
+                            <div class="mt-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-sm text-slate-500">Experience Points</p>
+                                    <p class="text-xs text-slate-400">Next: <span id="xp-to-next-level">550</span> XP</p>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-4">
+                                    <div id="xp-bar" class="bg-sky-500 h-4 rounded-full transition-all duration-500" style="width: 45%;"></div>
+                                </div>
+                                <p id="xp-text" class="text-right text-sm text-slate-500 mt-1">450 / 1000 XP</p>
+
+                                <!-- Weekly Progress -->
+                                <div class="mt-3 pt-3 border-t border-slate-100">
+                                    <p class="text-xs text-slate-500 mb-2">This Week's Progress</p>
+                                    <div class="flex justify-between text-xs">
+                                        <span>Quests Completed:</span>
+                                        <span class="font-semibold text-emerald-600" id="weekly-quests">12/15</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs mt-1">
+                                        <span>Stat Gain:</span>
+                                        <span class="font-semibold text-sky-600" id="weekly-stat-gain">+8.5 avg</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h2 class="text-2xl font-bold mb-4">Daily Quests & Habit Tracking</h2>
+                            <p class="text-xs text-slate-500 mb-4">Impact Weights affect stat gains. Streaks multiply rewards. Diminishing returns apply after repeated actions.</p>
+
+                            <!-- Quest Categories -->
+                            <div class="flex flex-wrap gap-2 mb-4" id="quest-categories">
+                                <button class="quest-filter bg-sky-500 text-white px-3 py-1 rounded-full text-xs font-semibold" data-category="all">All</button>
+                                <button class="quest-filter bg-white text-slate-600 px-3 py-1 rounded-full text-xs font-semibold border border-slate-300" data-category="vitality">Vitality</button>
+                                <button class="quest-filter bg-white text-slate-600 px-3 py-1 rounded-full text-xs font-semibold border border-slate-300" data-category="cognition">Cognition</button>
+                                <button class="quest-filter bg-white text-slate-600 px-3 py-1 rounded-full text-xs font-semibold border border-slate-300" data-category="resilience">Resilience</button>
+                                <button class="quest-filter bg-white text-slate-600 px-3 py-1 rounded-full text-xs font-semibold border border-slate-300" data-category="prosperity">Prosperity</button>
+                            </div>
+
+                            <div id="quest-list" class="space-y-4">
+                                <!-- Enhanced quest items will be populated by JavaScript -->
+                            </div>
+
+                            <!-- Streak Summary -->
+                            <div class="mt-6 pt-4 border-t border-slate-200">
+                                <h4 class="font-semibold mb-3 text-slate-700">Active Habit Streaks</h4>
+                                <div id="streak-summary" class="space-y-2">
+                                    <!-- Streak information will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+</html>

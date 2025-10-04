@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odyssey: Investors - The Life Navigation RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 40vh;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 50vh;
+            }
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            color: #0ea5e9;
+            border-bottom-color: #0ea5e9;
+        }
+        .tooltip-custom {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted #475569;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="app-container" class="min-h-screen">
+
+        <header class="bg-white shadow-sm sticky top-0 z-10">
+            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <a href="index.html" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                            <span class="text-2xl font-bold text-sky-600">O</span>
+                            <h1 class="text-xl font-bold text-slate-800">Odyssey</h1>
+                        </a>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="index.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold">Home</a>
+                        <a href="investors.html" class="nav-link text-sky-500 border-b-2 border-sky-500 pb-1 font-semibold" data-section="investors">Investors</a>
+                    </div>
+                    <div class="md:hidden">
+                         <button id="mobile-menu-button" class="text-slate-600 hover:text-sky-500">
+                             <span class="text-xl">☰</span>
+                         </button>
+                    </div>
+                </div>
+                 <div id="mobile-menu" class="md:hidden hidden flex flex-col space-y-2 pb-4">
+                    <a href="index.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold">Home</a>
+                    <a href="investors.html" class="nav-link text-sky-500 block px-2 py-1 font-semibold" data-section="investors">Investors</a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <section id="investors" class="app-section">
+                <h2 class="text-3xl font-bold mb-2">Investment Opportunity: Odyssey Platform</h2>
+                <p class="text-slate-500 mb-8">Comprehensive market analysis, growth projections, and technical roadmap for the revolutionary life management RPG platform.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-5 rounded-xl shadow-md border-t-4 border-sky-500">
+                        <p class="text-sm text-slate-500">Total Market Opportunity</p>
+                        <p class="text-3xl font-extrabold text-slate-800 mt-1">$240B+</p>
+                        <p class="text-xs text-emerald-500 mt-2">Combined markets (Habits, Wellness, Logistics)</p>
+                    </div>
+                     <div class="bg-white p-5 rounded-xl shadow-md border-t-4 border-emerald-500">
+                        <p class="text-sm text-slate-500">Gamification Advantage</p>
+                        <p class="text-3xl font-extrabold text-slate-800 mt-1">25-40%</p>
+                        <p class="text-xs text-emerald-700 mt-2">Higher retention rates than traditional apps.</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-md border-t-4 border-amber-500">
+                        <p class="text-sm text-slate-500">Core Revenue Model</p>
+                        <p class="text-3xl font-extrabold text-slate-800 mt-1">1% + €4.99</p>
+                        <p class="text-xs text-amber-700 mt-2">Travel fees + Premium Subscription (aligned success)</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-xl font-bold mb-4">Market Growth Projections (CAGR)</h3>
+                            <p class="text-sm text-slate-500 mb-4">Projected Compounded Annual Growth Rate for key target markets (2024-2033).</p>
+                            <div class="chart-container h-[50vh] max-w-xl mx-auto">
+                                <canvas id="marketChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-xl font-bold mb-4">Investment Highlights</h3>
+                            <div class="space-y-4 text-sm">
+                                <div class="p-4 bg-sky-50 rounded-lg border-l-4 border-sky-500">
+                                    <p class="font-bold text-sky-600">Massive Market Potential</p>
+                                    <p class="text-slate-600">$240B+ market opportunity across three converging sectors</p>
+                                </div>
+                                <div class="p-4 bg-emerald-50 rounded-lg border-l-4 border-emerald-500">
+                                    <p class="font-bold text-emerald-600">Proven Gamification Edge</p>
+                                    <p class="text-slate-600">25-40% higher retention than traditional productivity apps</p>
+                                </div>
+                                <div class="p-4 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+                                    <p class="font-bold text-amber-600">Scalable Revenue Model</p>
+                                    <p class="text-slate-600">Dual revenue streams with strong alignment incentives</p>
+                                </div>
+                                <div class="p-4 bg-rose-50 rounded-lg border-l-4 border-rose-500">
+                                    <p class="font-bold text-rose-600">Technical Innovation</p>
+                                    <p class="text-slate-600">Proprietary ML systems (The Oracle, Health-Guard, Future Self Simulator)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-white p-6 rounded-xl shadow-md">
+                     <h3 class="text-2xl font-bold mb-4">Core Innovation Breakdown</h3>
+                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                         <div class="p-4 bg-slate-50 rounded-lg border">
+                             <p class="font-bold text-sky-600">The Oracle</p>
+                             <p class="text-sm text-slate-600">ML-driven <strong>Delay Risk Scores</strong> for transport using aggregated real-time operator and crowd-sourced data.</p>
+                         </div>
+                         <div class="p-4 bg-slate-50 rounded-lg border">
+                             <p class="font-bold text-emerald-600">Future Self Simulator</p>
+                             <p class="text-sm text-slate-600"><strong>Behavioral modeling</strong> and <strong>Monte Carlo</strong> projections to visualize long-term habit impact across life domains.</p>
+                         </div>
+                         <div class="p-4 bg-slate-50 rounded-lg border">
+                             <p class="font-bold text-amber-600">Health-Guard</p>
+                             <p class="text-sm text-slate-600">On-device ML analysis of physiological data (HRV, sleep) from wearables for real-time recovery suggestions.</p>
+                         </div>
+                     </div>
+                </div>
+
+                <div class="mt-8 bg-white p-6 rounded-xl shadow-md">
+                     <h3 class="text-2xl font-bold mb-4">Technical Architecture Advantages</h3>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div>
+                             <h4 class="text-lg font-bold mb-3 text-slate-700">Innovation Pipeline</h4>
+                             <ul class="space-y-2 text-sm">
+                                 <li class="flex items-start"><span class="text-emerald-500 mr-2">✓</span> <strong>The Oracle:</strong> GTFS-Realtime + ML prediction</li>
+                                 <li class="flex items-start"><span class="text-emerald-500 mr-2">✓</span> <strong>Health-Guard:</strong> On-device physiological analysis</li>
+                                 <li class="flex items-start"><span class="text-emerald-500 mr-2">✓</span> <strong>Future Self Simulator:</strong> Behavioral modeling & projections</li>
+                             </ul>
+                         </div>
+                         <div>
+                             <h4 class="text-lg font-bold mb-3 text-slate-700">Market Positioning</h4>
+                             <ul class="space-y-2 text-sm">
+                                 <li class="flex items-start"><span class="text-sky-500 mr-2">→</span> First-mover advantage in life management RPG</li>
+                                 <li class="flex items-start"><span class="text-sky-500 mr-2">→</span> Cross-domain integration (habits + transport + wellness)</li>
+                                 <li class="flex items-start"><span class="text-sky-500 mr-2">→</span> Strong network effects through social features</li>
+                             </ul>
+                         </div>
+                     </div>
+                </div>
+
+                <div class="mt-8 bg-gradient-to-r from-sky-500 to-emerald-500 text-white p-6 rounded-xl shadow-md">
+                     <h3 class="text-2xl font-bold mb-4">Investment Thesis</h3>
+                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                         <div>
+                             <p class="text-3xl font-extrabold mb-2">$240B+</p>
+                             <p class="text-sm opacity-90">Total Addressable Market</p>
+                         </div>
+                         <div>
+                             <p class="text-3xl font-extrabold mb-2">25-40%</p>
+                             <p class="text-sm opacity-90">Retention Advantage</p>
+                         </div>
+                         <div>
+                             <p class="text-3xl font-extrabold mb-2">3</p>
+                             <p class="text-sm opacity-90">Proprietary ML Systems</p>
+                         </div>
+                     </div>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
