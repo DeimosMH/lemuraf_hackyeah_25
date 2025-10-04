@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Leafy Tree</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .control-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .control-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        canvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-6 md:p-8 text-center">
+        <header class="mb-4">
+            <h1 class="text-3xl font-bold text-emerald-800">The Lifecycle Canopy</h1>
+            <p id="status-text" class="text-stone-500 mt-2">A tiny seed awaits. Give it life.</p>
+        </header>
+
+        <main class="mb-6">
+            <div class="chart-container relative w-full h-64 sm:h-80 md:h-96 max-h-[500px] mx-auto bg-stone-100 rounded-xl overflow-hidden">
+                <canvas id="treeCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+            </div>
+        </main>
+
+        <footer class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button id="growBtn" class="control-button w-full sm:w-auto text-white bg-emerald-600 hover:bg-emerald-700 font-medium rounded-lg text-sm px-8 py-3 focus:outline-none focus:ring-4 focus:ring-emerald-200">
+                Grow
+            </button>
+            <button id="witherBtn" class="control-button w-full sm:w-auto text-white bg-amber-600 hover:bg-amber-700 font-medium rounded-lg text-sm px-8 py-3 focus:outline-none focus:ring-4 focus:ring-amber-200">
+                Wither
+            </button>
+            <button id="resetBtn" class="control-button w-full sm:w-auto text-white bg-rose-600 hover:bg-rose-700 font-medium rounded-lg text-sm px-8 py-3 focus:outline-none focus:ring-4 focus:ring-rose-200">
+                Reset
+            </button>
+        </footer>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('treeCanvas');
+        const ctx = canvas.getContext('2d');
+        const growBtn = document.getElementById('growBtn');
+        const witherBtn = document.getElementById('witherBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusText = document.getElementById('status-text');
+
+        let treeState = {
+            level: 0,
+            maxLevel: 10,
+            minLevel: 0,
+            branchColor: '#452a1a', // Darker brown for trunk
+            leafColor: 'rgba(22, 163, 74, 0.7)', // Vibrant green
+            witherColor: 'rgba(217, 119, 6, 0.7)', // Orange-brown for autumn/wither
+            angle: Math.PI / 4, // Wider angle for broader canopy
+            randomFactor: 0.4 // More randomness for organic shape
+        };
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = container.clientWidth * dpr;
+            canvas.height = container.clientHeight * dpr;
+            ctx.scale(dpr, dpr);
+            draw();
+        }
+
+        function drawBranch(x1, y1, angle, len, depth) {
+            if (depth > treeState.level) return;
+
+            ctx.lineWidth = Math.max(1, 6 - depth * 0.4); // Thicker branches at lower depths
+            ctx.strokeStyle = treeState.branchColor;
+
+            const x2 = x1 + Math.cos(angle) * len;
+            const y2 = y1 + Math.sin(angle) * len; 
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            // Foliage drawing: Create a dense, overlapping canopy
+            if (depth >= treeState.level - 4 && depth <= treeState.level) { // Focus foliage on the outer layers
+                ctx.fillStyle = treeState.leafColor;
+                
+                // Base radius for foliage blobs, scales with tree size
+                const baseRadius = treeState.level * 1.5; 
+                // Adjust radius based on depth to make lower foliage larger
+                const radius = Math.max(8, baseRadius * (1 - (depth / treeState.maxLevel))); 
+                
+                // Draw multiple overlapping circles for a dense, blobby canopy effect
+                for (let i = 0; i < 7; i++) { // Increased number of circles
+                    ctx.beginPath();
+                    // Add significant randomness to placement around the branch end
+                    const rx = x2 + (Math.random() - 0.5) * radius * 2; // Wider spread
+                    const ry = y2 + (Math.random() - 0.5) * radius * 2;
+                    const r = radius * (0.6 + Math.random() * 0.4); // Vary blob size
+                    ctx.arc(rx, ry, r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            if (depth < treeState.maxLevel) { 
+                 const nextLength = len * 0.7; // Standard fractal reduction
+                 const newAngle1 = angle + treeState.angle * (1 - treeState.randomFactor * Math.random());
+                 const newAngle2 = angle - treeState.angle * (1 - treeState.randomFactor * Math.random());
+
+                 drawBranch(x2, y2, newAngle1, nextLength, depth + 1);
+                 drawBranch(x2, y2, newAngle2, nextLength, depth + 1);
+            }
+        }
+        
+        function draw() {
+            const container = canvas.parentElement;
+            const cw = container.clientWidth;
+            const ch = container.clientHeight;
+            ctx.clearRect(0, 0, cw, ch);
+
+            const startX = cw / 2;
+            const startY = ch;
+            const initialLength = ch * 0.20; 
+
+            if (treeState.level > 0) {
+                 drawBranch(startX, startY, -Math.PI / 2, initialLength, 1);
+            } else {
+                 // Draw the seed (level 0)
+                 ctx.fillStyle = treeState.branchColor;
+                 ctx.beginPath();
+                 ctx.ellipse(startX, startY - 5, 10, 5, 0, 0, Math.PI * 2);
+                 ctx.fill();
+            }
+        }
+        
+        function updateStatus() {
+            if (treeState.level <= 0) {
+                statusText.textContent = "A tiny seed awaits. Give it life.";
+            } else if (treeState.level < 3) {
+                statusText.textContent = `A sapling is sprouting, currently at level ${treeState.level}.`;
+            } else if (treeState.level < 7) {
+                statusText.textContent = `The canopy is thickening, reaching for the sun. (Level ${treeState.level})`;
+            } else if (treeState.level <= treeState.maxLevel) {
+                statusText.textContent = `Mature and dense, the tree is in its prime. (Level ${treeState.level})`;
+            }
+            
+            if(treeState.leafColor === treeState.witherColor && treeState.level > 0){
+                statusText.textContent = `Autumn arrives. The dense canopy is fading... (Level ${treeState.level})`;
+            } else if (treeState.leafColor === treeState.witherColor && treeState.level === 0) {
+                statusText.textContent = `Winter. The seed rests, waiting for spring.`;
+            }
+        }
+
+        function grow() {
+            if (treeState.level < treeState.maxLevel) {
+                treeState.level++;
+                treeState.leafColor = 'rgba(22, 163, 74, 0.7)'; // Vibrant Green
+                draw();
+                updateStatus();
+            }
+        }
+
+        function wither() {
+            if (treeState.level > treeState.minLevel) {
+                treeState.level--;
+                treeState.leafColor = treeState.witherColor; // Orange/Brown for Withered state
+                draw();
+                updateStatus();
+            }
+        }
+
+        function reset() {
+            treeState.level = 0;
+            treeState.leafColor = 'rgba(22, 163, 74, 0.7)';
+            draw();
+            updateStatus();
+        }
+
+        growBtn.addEventListener('click', grow);
+        witherBtn.addEventListener('click', wither);
+        resetBtn.addEventListener('click', reset);
+
+        window.addEventListener('resize', resizeCanvas);
+        
+        window.onload = () => {
+            resizeCanvas();
+        };
+    </script>
+</body>
+</html>
