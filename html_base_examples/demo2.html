@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odyssey: Feasibility Analysis Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 40vh;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 50vh;
+            }
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            color: #0ea5e9;
+            border-bottom-color: #0ea5e9;
+        }
+        .tooltip-custom {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted #475569;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="app-container" class="min-h-screen">
+
+        <header class="bg-white shadow-sm sticky top-0 z-10">
+            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-2xl font-bold text-sky-600">O</span>
+                        <h1 class="text-xl font-bold text-slate-800">Odyssey</h1>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="#dashboard" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold active" data-section="dashboard">Dashboard</a>
+                        <a href="#logistics" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="logistics">Logistics</a>
+                        <a href="#simulator" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="simulator">Simulator</a>
+                        <a href="#community" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="community">Community</a>
+                        <a href="#blueprint" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="blueprint">Blueprint</a>
+                    </div>
+                    <div class="md:hidden">
+                         <button id="mobile-menu-button" class="text-slate-600 hover:text-sky-500">
+                             <span class="text-xl">☰</span>
+                         </button>
+                    </div>
+                </div>
+                 <div id="mobile-menu" class="md:hidden hidden flex flex-col space-y-2 pb-4">
+                    <a href="#dashboard" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold active" data-section="dashboard">Dashboard</a>
+                    <a href="#logistics" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="logistics">Logistics</a>
+                    <a href="#simulator" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="simulator">Simulator</a>
+                    <a href="#community" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="community">Community</a>
+                    <a href="#blueprint" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="blueprint">Blueprint</a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <section id="dashboard" class="app-section">
+                <h2 class="text-3xl font-bold mb-1">Character Sheet: The Fusion Thesis</h2>
+                <p class="text-slate-500 mb-6">Odyssey integrates logistical performance with behavioral metrics. Successfully avoiding transit chaos awards **Evasion Points**, directly boosting your **RESILIENCE** stat and turning stress management into a rewarding gameplay mechanic.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-2xl font-bold mb-1">Core Stat Architecture</h3>
+                            <p class="text-slate-500 mb-4">Your stats map to a holistic well-being model, ensuring progression reflects genuine life improvement. Hover over a stat for details.</p>
+                            <div class="chart-container max-w-lg mx-auto">
+                                <canvas id="statsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 id="char-level" class="text-lg font-bold">Alex <span class="text-sm font-medium text-slate-500">Lv. 12</span></h3>
+                                    <p class="text-xs font-bold text-amber-600 mt-1">Evasion Points: <span id="evasion-points">0</span></p>
+                                </div>
+                                <div class="text-right">
+                                     <p class="text-lg font-bold text-yellow-500" title="Acquired by improving PROSPERITY">
+                                        <span id="char-gold">150</span> G
+                                     </p>
+                                </div>
+                            </div>
+                             <p class="text-sm text-slate-500 mb-2 mt-3">Experience Points</p>
+                            <div class="w-full bg-slate-200 rounded-full h-4">
+                                <div id="xp-bar" class="bg-sky-500 h-4 rounded-full transition-all duration-500" style="width: 45%;"></div>
+                            </div>
+                             <p id="xp-text" class="text-right text-sm text-slate-500 mt-1">450 / 1000 XP</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-2xl font-bold mb-4">Daily Quests</h3>
+                            <p class="text-xs text-slate-400 mb-4 -mt-3">Based on the hybrid model of habit formation, focusing on contextual cues.</p>
+                            <div id="quest-list" class="space-y-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="logistics" class="app-section hidden">
+                 <h2 class="text-3xl font-bold mb-2">The Oracle: Predictive Logistics</h2>
+                 <p class="text-slate-500 mb-8">The Oracle fuses data from three sources to calculate a **Delay Risk Score (DRS)**: 1) Operator **GTFS-Realtime** feeds, 2) Historical performance logs, and 3) Gamified **Crowdsourced Reports** from users like you.</p>
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                     <div>
+                        <h3 class="text-2xl font-bold mb-4">Trip Predictions & DRS</h3>
+                        <div id="trip-list" class="space-y-4"></div>
+                     </div>
+                     <div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-2xl font-bold mb-4">Crowdsourced Data Verification</h3>
+                            <p class="text-sm text-slate-500 mb-4">Help improve The Oracle's accuracy. Verifying real-time reports from other users grants micro-rewards and makes the system smarter for everyone.</p>
+                            <div id="crowdsource-list"></div>
+                        </div>
+                     </div>
+                 </div>
+            </section>
+
+            <section id="simulator" class="app-section hidden">
+                <h2 class="text-3xl font-bold mb-2">Future Self Simulator: Life Run Visualization</h2>
+                <p class="text-slate-500 mb-8">This module addresses the "Life Run" challenge by modeling the long-term impact of your habits. It avoids the "illusion of choice" by showing radically divergent outcomes based on your consistency.</p>
+                 <div class="bg-white p-6 rounded-xl shadow-md">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                        <div class="md:col-span-2">
+                             <div class="chart-container max-w-2xl mx-auto h-96">
+                                <canvas id="futureChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">Forecasting Controls</h3>
+                            <label for="success-rate" class="block text-sm font-medium text-slate-700">Weighted 30-Day Habit Fidelity</label>
+                            <div class="flex items-center space-x-4 mt-2">
+                                <input id="success-rate" type="range" min="0" max="100" value="75" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                <span id="success-rate-value" class="font-bold text-sky-600 text-lg">75%</span>
+                            </div>
+                             <div id="simulation-narrative" class="mt-6 bg-slate-100 p-4 rounded-lg"></div>
+                             <div class="mt-4 text-xs text-slate-400">
+                                 <p><b class="text-slate-500">Prosperity Model:</b> Time Series AI (LSTM/ARIMA)</p>
+                                 <p><b class="text-slate-500">Vitality Model:</b> RESILIENCE trend analysis</p>
+                             </div>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+
+            <section id="community" class="app-section hidden">
+                <h2 class="text-3xl font-bold mb-2">Social Systems: Parties & Guilds</h2>
+                <p class="text-slate-500 mb-6">Social features are structured to foster accountability and identity. Join short-term **Parties** for specific goals or long-term **Guilds** based on shared interests.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="md:col-span-2">
+                        <h3 class="text-2xl font-bold mb-4">Guild Hall & Local Events</h3>
+                        <div id="event-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                    </div>
+                    <div>
+                        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+                            <h3 class="text-xl font-bold mb-4">Active Party Challenges</h3>
+                             <p class="text-sm text-slate-400">No active parties.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                           <h3 class="text-2xl font-bold mb-4">Travel Quests</h3>
+                           <div id="travel-quest-list" class="space-y-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="blueprint" class="app-section hidden">
+                <h2 class="text-3xl font-bold mb-2">Architectural & Feasibility Blueprint</h2>
+                <p class="text-slate-500 mb-8">A summary of the strategic, technical, and compliance roadmap underpinning the Odyssey platform.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-5 rounded-xl shadow-md border-t-4 border-sky-500">
+                        <p class="text-sm text-slate-500">Wellness Travel Market (2030)</p>
+                        <p class="text-3xl font-extrabold text-slate-800 mt-1">$1.59T</p>
+                        <p class="text-xs text-emerald-500 mt-2">Projected market size for "calmcations".</p>
+                    </div>
+                     <div class="bg-white p-5 rounded-xl shadow-md border-t-4 border-emerald-500">
+                        <p class="text-sm text-slate-500">Type-Safe Architecture</p>
+                        <p class="text-3xl font-extrabold text-slate-800 mt-1">tRPC</p>
+                        <p class="text-xs text-emerald-700 mt-2">End-to-end type safety prevents data failure across platforms.</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-md border-t-4 border-amber-500">
+                        <p class="text-sm text-slate-500">Security & Compliance</p>
+                        <p class="text-3xl font-extrabold text-slate-800 mt-1">Tokenization</p>
+                        <p class="text-xs text-amber-700 mt-2">Mitigates PCI DSS scope by avoiding direct handling of card data.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                     <h3 class="text-2xl font-bold mb-4">Phased MVP Roadmap</h3>
+                     <div id="roadmap-timeline" class="space-y-6 pt-2">
+                        </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-bold mb-4">Core Innovation & ML Models</h3>
+                         <div class="space-y-4">
+                             <div class="p-4 bg-slate-50 rounded-lg border">
+                                 <p class="font-bold text-sky-600">The Oracle (Logistics)</p>
+                                 <p class="text-sm text-slate-600">Fuses GTFS-RT, historical, and crowdsourced data. Uses **Gradient Boosting** or **ANN** models for Delay Risk Scoring (DRS).</p>
+                             </div>
+                             <div class="p-4 bg-slate-50 rounded-lg border">
+                                 <p class="font-bold text-emerald-600">Future Self Simulator</p>
+                                 <p class="text-sm text-slate-600">Employs **Wavelet LSTM** & **ARIMA** models for non-linear financial forecasting and RESILIENCE trend analysis for health projections.</p>
+                             </div>
+                         </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-bold mb-4">Technical Stack</h3>
+                        <p class="text-sm text-slate-500 mb-4">A modern, type-safe full-stack monorepo for maximum code sharing and development velocity.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><b>Frontend:</b> Next.js (Web), Expo/React Native (Mobile)</li>
+                            <li><b>API Layer:</b> tRPC (End-to-end type safety)</li>
+                            <li><b>ORM:</b> Prisma (Type-safe database access)</li>
+                            <li><b>Monorepo Management:</b> Turborepo / PNPM</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const state = {
+        character: {
+            level: 12,
+            xp: 450,
+            xp_needed: 1000,
+            base_xp_increment: 500,
+            gold: 150,
+            evasionPoints: 0,
+            stats: {
+                vitality: 70,
+                cognition: 85,
+                resilience: 60,
+                prosperity: 50
+            },
+            inventory: []
+        },
+        quests: [
+            { id: 1, text: "Complete morning workout", stat: "vitality", xp: 20, impactWeight: 0.3, done: false },
+            { id: 2, text: "30 mins of deep work", stat: "cognition", xp: 30, impactWeight: 0.5, done: true },
+            { id: 3, text: "Maintain 7-day savings streak", stat: "prosperity", xp: 50, impactWeight: 0.8, done: false, rewardGold: 25 },
+            { id: 4, text: "Review daily budget", stat: "prosperity", xp: 10, impactWeight: 0.2, done: false },
+        ],
+        trips: [
+            { id: 1, name: "Commute to Work", time: "8:30 AM", drs: 75, risk: "High", isEvasible: true, evaded: false },
+            { id: 2, name: "Train to Central Station", time: "2:00 PM", drs: 15, risk: "Low", isEvasible: false, evaded: false },
+            { id: 3, name: "Bus to Airport", time: "6:00 PM", drs: 45, risk: "Medium", isEvasible: true, evaded: false },
+        ],
+        crowdsourceReports: [
+            { id: 1, text: "Major overcrowding reported on Line 2", reward: { type: 'resilience', value: 1 }, status: 'pending' }
+        ],
+        travel_quests: [
+            { id: 1, title: "Recharge: Forest Bathing", type: "Calmcation", reward: "+10 VITALITY Buff", desc: "Low-stress quest granting a temporary VITALITY buff upon completion." },
+            { id: 2, title: "Cultural Exchange: Market Day", type: "Cultural", reward: "+30 COGNITION XP", desc: "Engage with local culture to earn COGNITION XP and unique rewards." },
+        ],
+        events: [
+            { id: 1, name: "Weekend Mountain Trek", interest: "hiking", location: "Green Valley Park", type: "Local Side Quest" },
+            { id: 2, name: "Community Cleanup", interest: "group", location: "City Park", type: "Guild Raid Challenge" },
+            { id: 3, name: "Hackathon Kick-off", interest: "coding", location: "Innovation Center", type: "Guild Raid Challenge" },
+        ],
+        roadmap: [
+            { phase: 'I', title: 'Core Gamified Loop (MVP)', complexity: 'Low-to-Moderate', features: 'Character Sheet (4 Stats), Daily/To-Do Quests, Milestone Habits, Basic Life Run (Linear Projection).', color: 'emerald'},
+            { phase: 'II', title: 'Predictive Logistics & Resilience', complexity: 'High', features: 'The Oracle (GTFS-RT data only), Real-time Stress Tracking (Passive Wearable Integration). No rerouting yet.', color: 'sky'},
+            { phase: 'III', title: 'Ecosystem & Commerce', complexity: 'Very High', features: 'Full Oracle (with crowdsourcing & rerouting), Merchant API (tokenized compliance), Calmcations/Cultural Missions, Guild Hall.', color: 'amber'}
+        ],
+        activeSection: 'dashboard'
+    };
+
+    // --- Core Navigation & Rendering ---
+    const sections = document.querySelectorAll('.app-section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    let statsChart, futureChart;
+
+    function navigate(sectionId) {
+        state.activeSection = sectionId;
+        sections.forEach(s => s.classList.toggle('hidden', s.id !== sectionId));
+        navLinks.forEach(l => l.classList.toggle('active', l.dataset.section === sectionId));
+        if (!mobileMenu.classList.contains('hidden')) mobileMenu.classList.add('hidden');
+    }
+
+    navLinks.forEach(link => link.addEventListener('click', e => {
+        e.preventDefault();
+        navigate(e.target.dataset.section);
+    }));
+    mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+
+    function updateUI() {
+        // Render functions are separated for clarity
+        renderCharacterSheet();
+        renderQuests();
+        renderTrips();
+        renderCrowdsourcing();
+        updateStatsChart();
+    }
+    
+    // --- Component-Specific Render Functions ---
+    function renderCharacterSheet() {
+        const { level, xp, xp_needed, evasionPoints, gold } = state.character;
+        document.getElementById('char-level').innerHTML = `Alex <span class="text-sm font-medium text-slate-500">Lv. ${level}</span>`;
+        document.getElementById('evasion-points').textContent = evasionPoints;
+        document.getElementById('char-gold').textContent = gold;
+        document.getElementById('xp-bar').style.width = `${Math.max(0, (xp / xp_needed) * 100)}%`;
+        document.getElementById('xp-text').textContent = `${xp} / ${xp_needed} XP`;
+    }
+
+    function renderQuests() {
+        const questList = document.getElementById('quest-list');
+        questList.innerHTML = '';
+        state.quests.forEach(quest => {
+            const questEl = document.createElement('div');
+            questEl.className = 'flex items-center justify-between p-2 bg-slate-50 rounded-md';
+            const rewardHtml = quest.rewardGold ? `<span class="text-xs font-bold text-yellow-500 mr-2">+${quest.rewardGold} G</span>` : '';
+            questEl.innerHTML = `
+                <div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="quest-${quest.id}" data-id="${quest.id}" class="h-5 w-5 rounded border-gray-300 text-sky-600 focus:ring-sky-500 cursor-pointer" ${quest.done ? 'checked' : ''}>
+                        <label for="quest-${quest.id}" class="ml-3 text-sm ${quest.done ? 'text-slate-400 line-through' : 'text-slate-700'} cursor-pointer">${quest.text}</label>
+                    </div>
+                    <p class="text-xs text-slate-400 ml-8 mt-1">Impact Weight: ${quest.impactWeight}</p>
+                </div>
+                <div class="flex items-center">
+                    ${rewardHtml}
+                    <span class="text-xs font-bold text-emerald-500">+${quest.xp} XP</span>
+                </div>
+            `;
+            questList.appendChild(questEl);
+        });
+        questList.querySelectorAll('input[type="checkbox"]').forEach(cb => 
+            cb.addEventListener('change', e => handleQuestToggle(parseInt(e.target.dataset.id), e.target.checked))
+        );
+    }
+
+    function renderTrips() {
+        const tripList = document.getElementById('trip-list');
+        tripList.innerHTML = '';
+        state.trips.forEach(trip => {
+            let riskColor = { High: 'red', Medium: 'amber', Low: 'emerald' }[trip.risk];
+            const evasionButton = trip.isEvasible 
+                ? `<button data-trip-id="${trip.id}" class="evade-btn text-xs bg-sky-600 text-white font-bold py-1 px-3 rounded-md hover:bg-sky-700 disabled:bg-slate-400" ${trip.evaded ? 'disabled' : ''}>${trip.evaded ? 'Evaded' : 'Evade'}</button>` 
+                : `<span class="text-xs text-slate-500">Not Evasible</span>`;
+
+            const tripEl = document.createElement('div');
+            tripEl.className = 'bg-white p-4 rounded-xl shadow-md';
+            tripEl.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div><p class="font-bold">${trip.name}</p><p class="text-sm text-slate-500">${trip.time}</p></div>
+                    <span class="text-xs font-bold px-2 py-1 rounded-full bg-${riskColor}-100 text-${riskColor}-800">${trip.risk} Risk</span>
+                </div>
+                <div class="mt-3"><p class="text-sm font-medium mb-1">DRS: ${trip.drs}%</p><div class="w-full bg-slate-200 rounded-full h-2.5"><div class="bg-${riskColor}-500 h-2.5 rounded-full" style="width: ${trip.drs}%"></div></div></div>
+                <div class="mt-3 flex justify-between items-center"><p class="text-xs text-slate-500">25 min advance warning</p>${evasionButton}</div>
+            `;
+            tripList.appendChild(tripEl);
+        });
+        tripList.querySelectorAll('.evade-btn').forEach(b => 
+            b.addEventListener('click', e => handleEvasion(parseInt(e.target.dataset.tripId)))
+        );
+    }
+    
+    function renderCrowdsourcing() {
+        const list = document.getElementById('crowdsource-list');
+        list.innerHTML = '';
+        state.crowdsourceReports.forEach(report => {
+            const el = document.createElement('div');
+            el.className = 'bg-slate-100 p-3 rounded-lg';
+            let buttonsHtml = '';
+            if (report.status === 'pending') {
+                 buttonsHtml = `<div class="flex space-x-2"><button data-id="${report.id}" class="verify-btn text-xs bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1 px-2 rounded">Verify</button><button class="text-xs bg-slate-300 hover:bg-slate-400 text-slate-700 font-bold py-1 px-2 rounded">Dismiss</button></div>`;
+            } else {
+                 buttonsHtml = `<p class="text-sm font-semibold text-emerald-600">Verified (+${report.reward.value} Resilience)</p>`;
+            }
+            el.innerHTML = `
+                <p class="text-sm text-slate-700 mb-2">${report.text}</p>
+                <div class="flex justify-end items-center">${buttonsHtml}</div>
+            `;
+            list.appendChild(el);
+        });
+        list.querySelectorAll('.verify-btn').forEach(b => 
+            b.addEventListener('click', e => handleVerification(parseInt(e.target.dataset.id)))
+        );
+    }
+    
+    function renderRoadmap() {
+        const timeline = document.getElementById('roadmap-timeline');
+        timeline.innerHTML = '';
+        state.roadmap.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'relative pl-8 border-l-2 border-slate-200';
+            el.innerHTML = `
+                <div class="absolute w-4 h-4 rounded-full bg-${item.color}-500 -left-2 top-0 border-4 border-white"></div>
+                <p class="font-bold text-lg mb-1">Phase ${item.phase}: ${item.title}</p>
+                <p class="text-xs font-semibold text-slate-500 mb-2">Complexity: ${item.complexity}</p>
+                <p class="text-sm text-slate-600">${item.features}</p>
+            `;
+            timeline.appendChild(el);
+        });
+    }
+
+    function renderTravelAndEvents() {
+        const travelList = document.getElementById('travel-quest-list');
+        travelList.innerHTML = '';
+        state.travel_quests.forEach(q => {
+             const el = document.createElement('div');
+             el.className = 'bg-slate-50 p-4 rounded-xl border';
+             el.innerHTML = `<p class="text-xs font-semibold ${q.type === 'Calmcation' ? 'text-sky-600' : 'text-emerald-600'}">${q.type}</p><p class="font-bold mt-1">${q.title}</p><p class="text-sm text-slate-500 mt-1">${q.desc}</p><p class="text-sm font-medium text-amber-600 mt-3">Reward: ${q.reward}</p>`;
+             travelList.appendChild(el);
+        });
+        
+        const eventList = document.getElementById('event-list');
+        eventList.innerHTML = '';
+        state.events.forEach(e => {
+            const isRaid = e.type === 'Guild Raid Challenge';
+            const tagColor = isRaid ? 'text-red-600' : 'text-sky-600';
+            const el = document.createElement('div');
+            el.className = 'bg-white p-4 rounded-xl shadow-md';
+            el.innerHTML = `<p class="font-bold">${e.name}</p><p class="text-sm text-slate-500">${e.location}</p><p class="text-xs font-semibold mt-2 ${tagColor}">${e.type}</p>`;
+            eventList.appendChild(el);
+        });
+    }
+
+
+    // --- Interaction Handlers ---
+    function handleQuestToggle(questId, isDone) {
+        const quest = state.quests.find(q => q.id === questId);
+        if (!quest || quest.done === isDone) return;
+        quest.done = isDone;
+        const { character } = state;
+
+        if (isDone) {
+            character.xp += quest.xp;
+            if(quest.rewardGold) character.gold += quest.rewardGold;
+            character.stats[quest.stat] = Math.min(100, character.stats[quest.stat] + 5);
+            while (character.xp >= character.xp_needed) {
+                character.xp -= character.xp_needed;
+                character.level++;
+                character.xp_needed += character.base_xp_increment;
+            }
+        } else {
+            character.xp -= quest.xp;
+            if(quest.rewardGold) character.gold -= quest.rewardGold;
+            character.stats[quest.stat] = Math.max(0, character.stats[quest.stat] - 5);
+            while (character.xp < 0) {
+                character.level--;
+                character.xp_needed -= character.base_xp_increment;
+                character.xp += character.xp_needed;
+            }
+        }
+        updateUI();
+    }
+    
+    function handleEvasion(tripId) {
+        const trip = state.trips.find(t => t.id === tripId);
+        if (!trip || trip.evaded) return;
+        trip.evaded = true;
+        state.character.evasionPoints += 10;
+        state.character.stats.resilience = Math.min(100, state.character.stats.resilience + 5);
+        updateUI();
+    }
+    
+    function handleVerification(reportId) {
+        const report = state.crowdsourceReports.find(r => r.id === reportId);
+        if (!report || report.status !== 'pending') return;
+        report.status = 'verified';
+        if (report.reward.type === 'resilience') {
+            state.character.stats.resilience = Math.min(100, state.character.stats.resilience + report.reward.value);
+        }
+        updateUI();
+    }
+
+    // --- Charting Functions ---
+    function createStatsChart() {
+        const statDetails = {
+            vitality: "HP/Stamina: Measured via Sleep Score, Workout completion, and passive HRV/RHR data from wearables.",
+            cognition: "Mana/Skill: Tracks focus sessions and completion of Learning Quests.",
+            resilience: "Armor/Defense: Tracks stress via all-day HRV. Decreased by logistical stress, increased by successful Evasion.",
+            prosperity: "Gold/Fortune: Tracks financial health via Open Banking APIs and savings goal completion."
+        };
+        const ctx = document.getElementById('statsChart').getContext('2d');
+        statsChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: Object.keys(state.character.stats).map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+                datasets: [{
+                    label: 'Character Stats',
+                    data: Object.values(state.character.stats),
+                    backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                    borderColor: 'rgb(14, 165, 233)',
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: { legend: { display: false }, tooltip: {
+                    callbacks: {
+                        label: (context) => Object.values(statDetails)[context.dataIndex]
+                    }
+                }},
+                scales: { r: { suggestedMin: 0, suggestedMax: 100, pointLabels: { font: { size: 14, weight: 'bold' } } } }
+            }
+        });
+    }
+
+    function updateStatsChart() {
+        if (statsChart) {
+            statsChart.data.datasets[0].data = Object.values(state.character.stats);
+            statsChart.update();
+        }
+    }
+
+    function createFutureChart() {
+        const ctx = document.getElementById('futureChart').getContext('2d');
+        futureChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Start', '3 Mo', '6 Mo', '9 Mo', '1 Year'],
+                datasets: [
+                    { label: 'Projected Prosperity', borderColor: 'rgb(16, 185, 129)', fill: false, tension: 0.4 },
+                    { label: 'Projected Vitality', borderColor: 'rgb(239, 68, 68)', fill: false, tension: 0.4 }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false, responsive: true,
+                plugins: { legend: { position: 'bottom' }, title: { display: true, text: '1-Year Epic Challenge Projection' } }
+            }
+        });
+        updateFutureChart(75);
+    }
+    
+    function updateFutureChart(fidelity) {
+        if (!futureChart) return;
+        const rate = fidelity / 100;
+        const base = 50; // Arbitrary starting point for viz
+        
+        const prosperityData = [base, base + (15*rate), base + (30*rate*1.2), base + (50*rate*1.4), base + (70*rate*1.6)];
+        const vitalityData = [base, base + (10*rate), base + (15*rate) - (5*(1-rate)), base + (20*rate) - (15*(1-rate)), base + (25*rate) - (30*(1-rate))];
+
+        futureChart.data.datasets[0].data = prosperityData;
+        futureChart.data.datasets[1].data = vitalityData;
+        futureChart.update();
+        
+        const narrativeEl = document.getElementById('simulation-narrative');
+        let narrativeText;
+        if (rate > 0.8) {
+            narrativeText = `<b>High Fidelity:</b> Projected future self is Level 45+ with High Prosperity and Vitality. Epic Challenge success is likely.`;
+        } else if (rate > 0.4) {
+            narrativeText = `<b>Moderate Fidelity:</b> Steady progress. Projected future self is Level 25-30. Vitality shows signs of strain.`;
+        } else {
+            narrativeText = `<b>Low Fidelity:</b> Stagnation. Projected future self is Level 12, with Low Prosperity and a high risk of burnout from declining RESILIENCE.`;
+        }
+        narrativeEl.innerHTML = `<p class="text-sm text-slate-600">${narrativeText}</p>`;
+    }
+    
+    const successSlider = document.getElementById('success-rate');
+    successSlider.addEventListener('input', e => {
+        document.getElementById('success-rate-value').textContent = `${e.target.value}%`;
+        updateFutureChart(parseInt(e.target.value));
+    });
+
+    // --- INITIALIZATION ---
+    function init() {
+        navigate('dashboard');
+        createStatsChart();
+        createFutureChart();
+        renderRoadmap();
+        renderTravelAndEvents();
+        updateUI();
+    }
+
+    init();
+});
+</script>
+</body>
+</html>
