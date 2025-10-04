@@ -288,15 +288,10 @@
         </div>
     </footer>
 
+    <script src="app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-
-            mobileMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
-            
+            // Mobile menu is now handled by app.js for consistency
             const header = document.getElementById('header');
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 50) {
@@ -319,128 +314,6 @@
             sections.forEach(section => {
                 observer.observe(section);
             });
-            
-            function createStatsRadarChart() {
-                const ctx = document.getElementById('statsRadarChart');
-                if (!ctx) return;
-                new Chart(ctx, {
-                    type: 'radar',
-                    data: {
-                        labels: ['Vitality', 'Cognition', 'Resilience', 'Prosperity'],
-                        datasets: [{
-                            label: 'Your Future Self',
-                            data: [75, 85, 60, 70],
-                            backgroundColor: 'rgba(138, 154, 91, 0.2)',
-                            borderColor: 'rgba(138, 154, 91, 1)',
-                            pointBackgroundColor: 'rgba(138, 154, 91, 1)',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgba(138, 154, 91, 1)'
-                        }]
-                    },
-                    options: {
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                             tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.dataset.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        label += context.raw;
-                                        return label;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            r: {
-                                angleLines: {
-                                    color: 'rgba(0, 0, 0, 0.1)'
-                                },
-                                grid: {
-                                    color: 'rgba(0, 0, 0, 0.1)'
-                                },
-                                pointLabels: {
-                                    font: {
-                                        size: 14,
-                                        weight: 'bold'
-                                    },
-                                    color: '#333333'
-                                },
-                                suggestedMin: 0,
-                                suggestedMax: 100,
-                                ticks: {
-                                    backdropColor: 'rgba(0,0,0,0)',
-                                    color: 'rgba(0,0,0,0.5)'
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-
-            function createProjectionLineChart() {
-                const ctx = document.getElementById('projectionLineChart');
-                if (!ctx) return;
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Start', 'Month 3', 'Month 6', 'Month 9', 'Year 1 Goal'],
-                        datasets: [{
-                            label: 'High Consistency',
-                            data: [10, 22, 35, 55, 90],
-                            borderColor: '#8A9A5B',
-                            backgroundColor: 'rgba(138, 154, 91, 0.1)',
-                            fill: true,
-                            tension: 0.4
-                        }, {
-                            label: 'Low Consistency',
-                            data: [10, 12, 11, 14, 20],
-                            borderColor: '#C0A062',
-                            backgroundColor: 'rgba(192, 160, 98, 0.1)',
-                            fill: true,
-                            tension: 0.4,
-                            borderDash: [5, 5]
-                        }]
-                    },
-                    options: {
-                        maintainAspectRatio: false,
-                        responsive: true,
-                        plugins: {
-                           legend: {
-                                position: 'bottom',
-                           },
-                           tooltip: {
-                                mode: 'index',
-                                intersect: false
-                           }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Projected Epic Challenge Success %'
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Time'
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-
-            createStatsRadarChart();
-            createProjectionLineChart();
         });
     </script>
 </body>

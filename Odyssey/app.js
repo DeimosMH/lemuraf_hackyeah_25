@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
 
-    let statsChart, futureChart, marketChart;
+    let statsChart = null, futureChart = null, marketChart = null;
 
     // Mobile menu toggle (if elements exist)
     if (mobileMenuButton && mobileMenu) {
@@ -64,24 +64,38 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UI Update Functions ---
     function updateUI() {
         // Only render components that exist on the current page
-        renderCharacterSheet();
-        renderQuests();
-        renderTrips();
-        renderCrowdsourcing();
-        renderTravelQuests();
-        renderEvents();
-        updateStatsChart();
-        updateBackgroundTree();
+        try {
+            renderCharacterSheet();
+            renderQuests();
+            renderTrips();
+            renderCrowdsourcing();
+            renderTravelQuests();
+            renderEvents();
+            updateStatsChart();
+            updateBackgroundTree();
+        } catch (error) {
+            console.warn('Some UI components could not be rendered:', error);
+        }
     }
     
     function renderCharacterSheet() {
-        if (document.getElementById('char-level')) {
-            const { level, xp, xp_needed, evasionPoints, gold } = state.character;
-            document.getElementById('char-level').innerHTML = `Alex <span class="text-sm font-medium text-slate-500">Lv. ${level}</span>`;
-            document.getElementById('evasion-points').textContent = evasionPoints;
-            document.getElementById('char-gold').textContent = gold;
-            document.getElementById('xp-bar').style.width = `${Math.max(0, (xp / xp_needed) * 100)}%`;
-            document.getElementById('xp-text').textContent = `${xp} / ${xp_needed} XP`;
+        try {
+            const charLevelEl = document.getElementById('char-level');
+            const evasionPointsEl = document.getElementById('evasion-points');
+            const charGoldEl = document.getElementById('char-gold');
+            const xpBarEl = document.getElementById('xp-bar');
+            const xpTextEl = document.getElementById('xp-text');
+
+            if (charLevelEl) {
+                const { level, xp, xp_needed, evasionPoints, gold } = state.character;
+                charLevelEl.innerHTML = `Alex <span class="text-sm font-medium text-slate-500">Lv. ${level}</span>`;
+                if (evasionPointsEl) evasionPointsEl.textContent = evasionPoints;
+                if (charGoldEl) charGoldEl.textContent = gold;
+                if (xpBarEl) xpBarEl.style.width = `${Math.max(0, (xp / xp_needed) * 100)}%`;
+                if (xpTextEl) xpTextEl.textContent = `${xp} / ${xp_needed} XP`;
+            }
+        } catch (error) {
+            console.warn('Error rendering character sheet:', error);
         }
     }
 
@@ -195,39 +209,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function filterEvents(interest) {
-        const eventCards = document.querySelectorAll('.event-card');
-        const interestTags = document.querySelectorAll('.interest-tag');
+        try {
+            const eventCards = document.querySelectorAll('.event-card');
+            const interestTags = document.querySelectorAll('.interest-tag');
 
-        if (eventCards.length > 0) {
-            eventCards.forEach(card => {
-                if (interest === 'all' || card.dataset.interest === interest) {
-                    card.classList.remove('hidden');
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
-        }
+            if (eventCards.length > 0) {
+                eventCards.forEach(card => {
+                    if (card && card.dataset) {
+                        if (interest === 'all' || card.dataset.interest === interest) {
+                            card.classList.remove('hidden');
+                        } else {
+                            card.classList.add('hidden');
+                        }
+                    }
+                });
+            }
 
-        if (interestTags.length > 0) {
-            interestTags.forEach(tag => {
-                if(tag.dataset.interest === interest) {
-                    tag.classList.add('bg-sky-500', 'text-white');
-                    tag.classList.remove('bg-white', 'text-slate-600');
-                } else {
-                    tag.classList.remove('bg-sky-500', 'text-white');
-                    tag.classList.add('bg-white', 'text-slate-600');
-                }
-            });
+            if (interestTags.length > 0) {
+                interestTags.forEach(tag => {
+                    if (tag && tag.dataset && tag.dataset.interest) {
+                        if (tag.dataset.interest === interest) {
+                            tag.classList.add('bg-sky-500', 'text-white');
+                            tag.classList.remove('bg-white', 'text-slate-600');
+                        } else {
+                            tag.classList.remove('bg-sky-500', 'text-white');
+                            tag.classList.add('bg-white', 'text-slate-600');
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.warn('Error filtering events:', error);
         }
     }
 
-    const interestTags = document.querySelectorAll('.interest-tag');
-    if (interestTags.length > 0) {
-        interestTags.forEach(tag => {
-            tag.addEventListener('click', (e) => {
-                filterEvents(e.target.dataset.interest);
+    // Event listeners for interest tags (only add if elements exist)
+    function setupInterestTagListeners() {
+        const interestTags = document.querySelectorAll('.interest-tag');
+        if (interestTags.length > 0) {
+            interestTags.forEach(tag => {
+                tag.addEventListener('click', (e) => {
+                    filterEvents(e.target.dataset.interest);
+                });
             });
-        });
+        }
     }
 
     function renderRoadmap() {
@@ -275,6 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         updateUI();
+        saveState();
     }
     
     function handleEvasion(tripId) {
@@ -284,6 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.character.evasionPoints += 10;
         state.character.stats.resilience = Math.min(100, state.character.stats.resilience + 5);
         updateUI();
+        saveState();
     }
     
     function handleVerification(reportId) {
@@ -294,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.character.stats.resilience = Math.min(100, state.character.stats.resilience + report.reward.value);
         }
         updateUI();
+        saveState();
     }
 
     // --- Charting Functions ---
@@ -344,6 +372,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (statsChart) {
             statsChart.data.datasets[0].data = Object.values(state.character.stats);
             statsChart.update();
+        }
+    }
+
+    function destroyCharts() {
+        if (statsChart) {
+            statsChart.destroy();
+            statsChart = null;
+        }
+        if (futureChart) {
+            futureChart.destroy();
+            futureChart = null;
+        }
+        if (marketChart) {
+            marketChart.destroy();
+            marketChart = null;
         }
     }
 
@@ -480,14 +523,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- State Persistence ---
+    function saveState() {
+        try {
+            localStorage.setItem('odyssey-state', JSON.stringify(state));
+        } catch (error) {
+            console.warn('Failed to save state:', error);
+        }
+    }
+
+    function loadState() {
+        try {
+            const savedState = localStorage.getItem('odyssey-state');
+            if (savedState) {
+                const parsedState = JSON.parse(savedState);
+                // Merge with default state to handle new properties
+                Object.keys(parsedState).forEach(key => {
+                    if (state.hasOwnProperty(key)) {
+                        if (typeof state[key] === 'object' && state[key] !== null) {
+                            Object.assign(state[key], parsedState[key]);
+                        } else {
+                            state[key] = parsedState[key];
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.warn('Failed to load state:', error);
+        }
+    }
+
     // --- INITIALIZATION ---
     function init() {
+        // Load saved state first
+        loadState();
+
+        // Set up interest tag listeners if they exist on this page
+        setupInterestTagListeners();
+
         // Only initialize components that exist on the current page
-        createStatsChart();
-        createFutureChart();
-        createMarketChart();
-        renderRoadmap();
-        updateUI();
+        try {
+            createStatsChart();
+            createFutureChart();
+            createMarketChart();
+            renderRoadmap();
+            updateUI();
+        } catch (error) {
+            console.warn('Error during initialization:', error);
+        }
+
+        // Save state periodically
+        setInterval(saveState, 30000); // Save every 30 seconds
     }
 
     init();
