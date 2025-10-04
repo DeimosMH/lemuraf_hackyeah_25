@@ -50,30 +50,20 @@ document.addEventListener('DOMContentLoaded', () => {
         activeSection: 'dashboard'
     };
 
-    // --- Core Navigation & Rendering ---
-    const sections = document.querySelectorAll('.app-section');
-    const navLinks = document.querySelectorAll('.nav-link');
+    // --- Multi-page Navigation (no SPA behavior needed) ---
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
-    
+
     let statsChart, futureChart, marketChart;
 
-    function navigate(sectionId) {
-        state.activeSection = sectionId;
-        sections.forEach(s => s.classList.toggle('hidden', s.id !== sectionId));
-        navLinks.forEach(l => l.classList.toggle('active', l.dataset.section === sectionId));
-        if (!mobileMenu.classList.contains('hidden')) mobileMenu.classList.add('hidden');
+    // Mobile menu toggle (if elements exist)
+    if (mobileMenuButton && mobileMenu) {
+        mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
     }
-
-    navLinks.forEach(link => link.addEventListener('click', e => {
-        e.preventDefault();
-        navigate(e.target.dataset.section);
-    }));
-    
-    mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
 
     // --- UI Update Functions ---
     function updateUI() {
+        // Only render components that exist on the current page
         renderCharacterSheet();
         renderQuests();
         renderTrips();
@@ -84,152 +74,177 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function renderCharacterSheet() {
-        const { level, xp, xp_needed, evasionPoints, gold } = state.character;
-        document.getElementById('char-level').innerHTML = `Alex <span class="text-sm font-medium text-slate-500">Lv. ${level}</span>`;
-        document.getElementById('evasion-points').textContent = evasionPoints;
-        document.getElementById('char-gold').textContent = gold;
-        document.getElementById('xp-bar').style.width = `${Math.max(0, (xp / xp_needed) * 100)}%`;
-        document.getElementById('xp-text').textContent = `${xp} / ${xp_needed} XP`;
+        if (document.getElementById('char-level')) {
+            const { level, xp, xp_needed, evasionPoints, gold } = state.character;
+            document.getElementById('char-level').innerHTML = `Alex <span class="text-sm font-medium text-slate-500">Lv. ${level}</span>`;
+            document.getElementById('evasion-points').textContent = evasionPoints;
+            document.getElementById('char-gold').textContent = gold;
+            document.getElementById('xp-bar').style.width = `${Math.max(0, (xp / xp_needed) * 100)}%`;
+            document.getElementById('xp-text').textContent = `${xp} / ${xp_needed} XP`;
+        }
     }
 
     function renderQuests() {
         const questList = document.getElementById('quest-list');
-        questList.innerHTML = '';
-        state.quests.forEach(quest => {
-            const questEl = document.createElement('div');
-            questEl.className = 'flex items-center justify-between p-2 bg-slate-50 rounded-md';
-            const rewardHtml = quest.rewardGold ? `<span class="text-xs font-bold text-yellow-500 mr-2">+${quest.rewardGold} G</span>` : '';
-            questEl.innerHTML = `
-                <div>
-                    <div class="flex items-center">
-                        <input type="checkbox" id="quest-${quest.id}" data-id="${quest.id}" class="h-5 w-5 rounded border-gray-300 text-sky-600 focus:ring-sky-500 cursor-pointer" ${quest.done ? 'checked' : ''}>
-                        <label for="quest-${quest.id}" class="ml-3 text-sm ${quest.done ? 'text-slate-400 line-through' : 'text-slate-700'} cursor-pointer">${quest.text}</label>
+        if (questList) {
+            questList.innerHTML = '';
+            state.quests.forEach(quest => {
+                const questEl = document.createElement('div');
+                questEl.className = 'flex items-center justify-between p-2 bg-slate-50 rounded-md';
+                const rewardHtml = quest.rewardGold ? `<span class="text-xs font-bold text-yellow-500 mr-2">+${quest.rewardGold} G</span>` : '';
+                questEl.innerHTML = `
+                    <div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="quest-${quest.id}" data-id="${quest.id}" class="h-5 w-5 rounded border-gray-300 text-sky-600 focus:ring-sky-500 cursor-pointer" ${quest.done ? 'checked' : ''}>
+                            <label for="quest-${quest.id}" class="ml-3 text-sm ${quest.done ? 'text-slate-400 line-through' : 'text-slate-700'} cursor-pointer">${quest.text}</label>
+                        </div>
+                        <p class="text-xs text-slate-400 ml-8 mt-1">Impact Weight: ${quest.impactWeight}</p>
                     </div>
-                    <p class="text-xs text-slate-400 ml-8 mt-1">Impact Weight: ${quest.impactWeight}</p>
-                </div>
-                <div class="flex items-center">
-                    ${rewardHtml}
-                    <span class="text-xs font-bold text-emerald-500">+${quest.xp} XP</span>
-                </div>
-            `;
-            questList.appendChild(questEl);
-        });
-        questList.querySelectorAll('input[type="checkbox"]').forEach(cb => 
-            cb.addEventListener('change', e => handleQuestToggle(parseInt(e.target.dataset.id), e.target.checked))
-        );
+                    <div class="flex items-center">
+                        ${rewardHtml}
+                        <span class="text-xs font-bold text-emerald-500">+${quest.xp} XP</span>
+                    </div>
+                `;
+                questList.appendChild(questEl);
+            });
+            questList.querySelectorAll('input[type="checkbox"]').forEach(cb =>
+                cb.addEventListener('change', e => handleQuestToggle(parseInt(e.target.dataset.id), e.target.checked))
+            );
+        }
     }
 
     function renderTrips() {
         const tripList = document.getElementById('trip-list');
-        tripList.innerHTML = '';
-        state.trips.forEach(trip => {
-            let riskColor = { High: 'red', Medium: 'amber', Low: 'emerald' }[trip.risk];
-            const evasionButton = trip.isEvasible 
-                ? `<button data-trip-id="${trip.id}" class="evade-btn text-xs bg-sky-600 text-white font-bold py-1 px-3 rounded-md hover:bg-sky-700 disabled:bg-slate-400" ${trip.evaded ? 'disabled' : ''}>${trip.evaded ? 'Evaded' : 'Evade'}</button>` 
-                : `<span class="text-xs text-slate-500">Not Evasible</span>`;
+        if (tripList) {
+            tripList.innerHTML = '';
+            state.trips.forEach(trip => {
+                let riskColor = { High: 'red', Medium: 'amber', Low: 'emerald' }[trip.risk];
+                const evasionButton = trip.isEvasible
+                    ? `<button data-trip-id="${trip.id}" class="evade-btn text-xs bg-sky-600 text-white font-bold py-1 px-3 rounded-md hover:bg-sky-700 disabled:bg-slate-400" ${trip.evaded ? 'disabled' : ''}>${trip.evaded ? 'Evaded' : 'Evade'}</button>`
+                    : `<span class="text-xs text-slate-500">Not Evasible</span>`;
 
-            const tripEl = document.createElement('div');
-            tripEl.className = 'bg-white p-4 rounded-xl shadow-md';
-            tripEl.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div><p class="font-bold">${trip.name}</p><p class="text-sm text-slate-500">${trip.time}</p></div>
-                    <span class="text-xs font-bold px-2 py-1 rounded-full bg-${riskColor}-100 text-${riskColor}-800">${trip.risk} Risk</span>
-                </div>
-                <div class="mt-3"><p class="text-sm font-medium mb-1">DRS: ${trip.drs}%</p><div class="w-full bg-slate-200 rounded-full h-2.5"><div class="bg-${riskColor}-500 h-2.5 rounded-full" style="width: ${trip.drs}%"></div></div></div>
-                <div class="mt-3 flex justify-between items-center"><p class="text-xs text-slate-500">25 min advance warning</p>${evasionButton}</div>
-            `;
-            tripList.appendChild(tripEl);
-        });
-        tripList.querySelectorAll('.evade-btn').forEach(b => 
-            b.addEventListener('click', e => handleEvasion(parseInt(e.target.dataset.tripId)))
-        );
+                const tripEl = document.createElement('div');
+                tripEl.className = 'bg-white p-4 rounded-xl shadow-md';
+                tripEl.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div><p class="font-bold">${trip.name}</p><p class="text-sm text-slate-500">${trip.time}</p></div>
+                        <span class="text-xs font-bold px-2 py-1 rounded-full bg-${riskColor}-100 text-${riskColor}-800">${trip.risk} Risk</span>
+                    </div>
+                    <div class="mt-3"><p class="text-sm font-medium mb-1">DRS: ${trip.drs}%</p><div class="w-full bg-slate-200 rounded-full h-2.5"><div class="bg-${riskColor}-500 h-2.5 rounded-full" style="width: ${trip.drs}%"></div></div></div>
+                    <div class="mt-3 flex justify-between items-center"><p class="text-xs text-slate-500">25 min advance warning</p>${evasionButton}</div>
+                `;
+                tripList.appendChild(tripEl);
+            });
+            tripList.querySelectorAll('.evade-btn').forEach(b =>
+                b.addEventListener('click', e => handleEvasion(parseInt(e.target.dataset.tripId)))
+            );
+        }
     }
     
     function renderCrowdsourcing() {
         const list = document.getElementById('crowdsource-list');
-        list.innerHTML = '';
-        state.crowdsourceReports.forEach(report => {
-            const el = document.createElement('div');
-            el.className = 'bg-slate-100 p-3 rounded-lg';
-            let buttonsHtml = '';
-            if (report.status === 'pending') {
-                 buttonsHtml = `<div class="flex space-x-2"><button data-id="${report.id}" class="verify-btn text-xs bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1 px-2 rounded">Verify</button><button class="text-xs bg-slate-300 hover:bg-slate-400 text-slate-700 font-bold py-1 px-2 rounded">Dismiss</button></div>`;
-            } else {
-                 buttonsHtml = `<p class="text-sm font-semibold text-emerald-600">Verified (+${report.reward.value} Resilience)</p>`;
-            }
-            el.innerHTML = `
-                <p class="text-sm text-slate-700 mb-2">${report.text}</p>
-                <div class="flex justify-end items-center">${buttonsHtml}</div>
-            `;
-            list.appendChild(el);
-        });
-        list.querySelectorAll('.verify-btn').forEach(b => 
-            b.addEventListener('click', e => handleVerification(parseInt(e.target.dataset.id)))
-        );
+        if (list) {
+            list.innerHTML = '';
+            state.crowdsourceReports.forEach(report => {
+                const el = document.createElement('div');
+                el.className = 'bg-slate-100 p-3 rounded-lg';
+                let buttonsHtml = '';
+                if (report.status === 'pending') {
+                     buttonsHtml = `<div class="flex space-x-2"><button data-id="${report.id}" class="verify-btn text-xs bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1 px-2 rounded">Verify</button><button class="text-xs bg-slate-300 hover:bg-slate-400 text-slate-700 font-bold py-1 px-2 rounded">Dismiss</button></div>`;
+                } else {
+                     buttonsHtml = `<p class="text-sm font-semibold text-emerald-600">Verified (+${report.reward.value} Resilience)</p>`;
+                }
+                el.innerHTML = `
+                    <p class="text-sm text-slate-700 mb-2">${report.text}</p>
+                    <div class="flex justify-end items-center">${buttonsHtml}</div>
+                `;
+                list.appendChild(el);
+            });
+            list.querySelectorAll('.verify-btn').forEach(b =>
+                b.addEventListener('click', e => handleVerification(parseInt(e.target.dataset.id)))
+            );
+        }
     }
     
     function renderTravelQuests() {
         const travelList = document.getElementById('travel-quest-list');
-        travelList.innerHTML = '';
-        state.travel_quests.forEach(q => {
-             const el = document.createElement('div');
-             el.className = 'bg-slate-50 p-4 rounded-xl border';
-             el.innerHTML = `<p class="text-xs font-semibold ${q.type === 'Calmcation' ? 'text-sky-600' : 'text-emerald-600'}">${q.type}</p><p class="font-bold mt-1">${q.title}</p><p class="text-sm text-slate-500 mt-1">${q.desc}</p><p class="text-sm font-medium text-amber-600 mt-3">Reward: ${q.reward}</p>`;
-             travelList.appendChild(el);
-        });
+        if (travelList) {
+            travelList.innerHTML = '';
+            state.travel_quests.forEach(q => {
+                 const el = document.createElement('div');
+                 el.className = 'bg-slate-50 p-4 rounded-xl border';
+                 el.innerHTML = `<p class="text-xs font-semibold ${q.type === 'Calmcation' ? 'text-sky-600' : 'text-emerald-600'}">${q.type}</p><p class="font-bold mt-1">${q.title}</p><p class="text-sm text-slate-500 mt-1">${q.desc}</p><p class="text-sm font-medium text-amber-600 mt-3">Reward: ${q.reward}</p>`;
+                 travelList.appendChild(el);
+            });
+        }
     }
     
     function renderEvents() {
         const eventList = document.getElementById('event-list');
-        eventList.innerHTML = '';
-        state.events.forEach(e => {
-            const el = document.createElement('div');
-            el.className = 'event-card bg-white p-4 rounded-xl shadow-md';
-            el.dataset.interest = e.interest;
-            el.innerHTML = `<p class="font-bold">${e.name}</p><p class="text-sm text-slate-500">${e.location}</p><p class="text-xs font-semibold mt-2 capitalize text-sky-600">${e.interest}</p>`;
-            eventList.appendChild(el);
-        });
+        if (eventList) {
+            eventList.innerHTML = '';
+            state.events.forEach(e => {
+                const el = document.createElement('div');
+                el.className = 'event-card bg-white p-4 rounded-xl shadow-md';
+                el.dataset.interest = e.interest;
+                el.innerHTML = `<p class="font-bold">${e.name}</p><p class="text-sm text-slate-500">${e.location}</p><p class="text-xs font-semibold mt-2 capitalize text-sky-600">${e.interest}</p>`;
+                eventList.appendChild(el);
+            });
+        }
     }
 
     function filterEvents(interest) {
-        document.querySelectorAll('.event-card').forEach(card => {
-            if (interest === 'all' || card.dataset.interest === interest) {
-                card.classList.remove('hidden');
-            } else {
-                card.classList.add('hidden');
-            }
-        });
-         document.querySelectorAll('.interest-tag').forEach(tag => {
-             if(tag.dataset.interest === interest) {
-                 tag.classList.add('bg-sky-500', 'text-white');
-                 tag.classList.remove('bg-white', 'text-slate-600');
-             } else {
-                 tag.classList.remove('bg-sky-500', 'text-white');
-                 tag.classList.add('bg-white', 'text-slate-600');
-             }
-         })
+        const eventCards = document.querySelectorAll('.event-card');
+        const interestTags = document.querySelectorAll('.interest-tag');
+
+        if (eventCards.length > 0) {
+            eventCards.forEach(card => {
+                if (interest === 'all' || card.dataset.interest === interest) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        if (interestTags.length > 0) {
+            interestTags.forEach(tag => {
+                if(tag.dataset.interest === interest) {
+                    tag.classList.add('bg-sky-500', 'text-white');
+                    tag.classList.remove('bg-white', 'text-slate-600');
+                } else {
+                    tag.classList.remove('bg-sky-500', 'text-white');
+                    tag.classList.add('bg-white', 'text-slate-600');
+                }
+            });
+        }
     }
 
-    document.querySelectorAll('.interest-tag').forEach(tag => {
-        tag.addEventListener('click', (e) => {
-            filterEvents(e.target.dataset.interest);
+    const interestTags = document.querySelectorAll('.interest-tag');
+    if (interestTags.length > 0) {
+        interestTags.forEach(tag => {
+            tag.addEventListener('click', (e) => {
+                filterEvents(e.target.dataset.interest);
+            });
         });
-    });
+    }
 
     function renderRoadmap() {
         const timeline = document.getElementById('roadmap-timeline');
-        timeline.innerHTML = '';
-        state.roadmap.forEach(item => {
-            const el = document.createElement('div');
-            el.className = 'relative pl-8 border-l-2 border-slate-200';
-            el.innerHTML = `
-                <div class="absolute w-4 h-4 rounded-full bg-${item.color}-500 -left-2 top-0 border-4 border-white"></div>
-                <p class="font-bold text-lg mb-1">Phase ${item.phase}: ${item.title}</p>
-                <p class="text-xs font-semibold text-slate-500 mb-2">Complexity: ${item.complexity}</p>
-                <p class="text-sm text-slate-600">${item.features}</p>
-            `;
-            timeline.appendChild(el);
-        });
+        if (timeline) {
+            timeline.innerHTML = '';
+            state.roadmap.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'relative pl-8 border-l-2 border-slate-200';
+                el.innerHTML = `
+                    <div class="absolute w-4 h-4 rounded-full bg-${item.color}-500 -left-2 top-0 border-4 border-white"></div>
+                    <p class="font-bold text-lg mb-1">Phase ${item.phase}: ${item.title}</p>
+                    <p class="text-xs font-semibold text-slate-500 mb-2">Complexity: ${item.complexity}</p>
+                    <p class="text-sm text-slate-600">${item.features}</p>
+                `;
+                timeline.appendChild(el);
+            });
+        }
     }
 
     // --- Interaction Handlers ---
@@ -282,43 +297,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Charting Functions ---
     function createStatsChart() {
-        const ctx = document.getElementById('statsChart').getContext('2d');
-        statsChart = new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: Object.keys(state.character.stats).map(s => s.charAt(0).toUpperCase() + s.slice(1)),
-                datasets: [{
-                    label: 'Character Stats',
-                    data: Object.values(state.character.stats),
-                    backgroundColor: 'rgba(56, 189, 248, 0.2)',
-                    borderColor: 'rgb(14, 165, 233)',
-                    pointBackgroundColor: 'rgb(14, 165, 233)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgb(14, 165, 233)'
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                responsive: true,
-                plugins: { 
-                    legend: { display: false }
+        const canvas = document.getElementById('statsChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            statsChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(state.character.stats).map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+                    datasets: [{
+                        label: 'Character Stats',
+                        data: Object.values(state.character.stats),
+                        backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                        borderColor: 'rgb(14, 165, 233)',
+                        pointBackgroundColor: 'rgb(14, 165, 233)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(14, 165, 233)'
+                    }]
                 },
-                scales: { 
-                    r: { 
-                        suggestedMin: 0, 
-                        suggestedMax: 100, 
-                        pointLabels: { font: { size: 14, weight: 'bold' } },
-                        angleLines: { display: true, color: 'rgba(0, 0, 0, 0.1)' },
-                        grid: { color: 'rgba(0, 0, 0, 0.1)' },
-                        ticks: {
-                            backdropColor: 'rgba(0,0,0,0)',
-                            stepSize: 20
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        r: {
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            pointLabels: { font: { size: 14, weight: 'bold' } },
+                            angleLines: { display: true, color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            ticks: {
+                                backdropColor: 'rgba(0,0,0,0)',
+                                stepSize: 20
+                            }
                         }
-                    } 
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     function updateStatsChart() {
@@ -329,44 +347,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createFutureChart() {
-        const ctx = document.getElementById('futureChart').getContext('2d');
-        futureChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Start', '3 Mo', '6 Mo', '9 Mo', '1 Year'],
-                datasets: [
-                    { 
-                        label: 'Projected Prosperity', 
-                        borderColor: 'rgb(16, 185, 129)', 
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        fill: true,
-                        tension: 0.4 
-                    },
-                    { 
-                        label: 'Projected Vitality', 
-                        borderColor: 'rgb(239, 68, 68)', 
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        fill: true,
-                        tension: 0.4 
-                    }
-                ]
-            },
-            options: {
-                maintainAspectRatio: false, 
-                responsive: true,
-                plugins: { 
-                    legend: { position: 'bottom' }, 
-                    title: { display: true, text: '1-Year Life Run Projection' } 
+        const canvas = document.getElementById('futureChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            futureChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Start', '3 Mo', '6 Mo', '9 Mo', '1 Year'],
+                    datasets: [
+                        {
+                            label: 'Projected Prosperity',
+                            borderColor: 'rgb(16, 185, 129)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Projected Vitality',
+                            borderColor: 'rgb(239, 68, 68)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        title: { display: true, text: 'Stat Value' }
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: '1-Year Life Run Projection' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: { display: true, text: 'Stat Value' }
+                        }
                     }
                 }
-            }
-        });
-        updateFutureChart(75);
+            });
+            updateFutureChart(75);
+        }
     }
     
     function updateFutureChart(fidelity) {
@@ -394,59 +415,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function createMarketChart() {
-        const ctx = document.getElementById('marketChart').getContext('2d');
-        marketChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Habit Tracking', 'Wellness Tourism', 'Gamification Apps'],
-                datasets: [{
-                    label: 'Projected CAGR (2024-2033)',
-                    data: [14.2, 13, 14.5], 
-                    backgroundColor: ['rgba(14, 165, 233, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(251, 191, 36, 0.7)'],
-                    borderColor: ['rgb(14, 165, 233)', 'rgb(16, 185, 129)', 'rgb(251, 191, 36)'],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                responsive: true,
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'CAGR (%)' }
-                    }
+        const canvas = document.getElementById('marketChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            marketChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Habit Tracking', 'Wellness Tourism', 'Gamification Apps'],
+                    datasets: [{
+                        label: 'Projected CAGR (2024-2033)',
+                        data: [14.2, 13, 14.5],
+                        backgroundColor: ['rgba(14, 165, 233, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(251, 191, 36, 0.7)'],
+                        borderColor: ['rgb(14, 165, 233)', 'rgb(16, 185, 129)', 'rgb(251, 191, 36)'],
+                        borderWidth: 1
+                    }]
                 },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
+                options: {
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    responsive: true,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'CAGR (%)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += context.parsed.x.toFixed(1) + '%';
+                                    }
+                                    return label;
                                 }
-                                if (context.parsed.x !== null) {
-                                    label += context.parsed.x.toFixed(1) + '%';
-                                }
-                                return label;
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     const successSlider = document.getElementById('success-rate');
-    successSlider.addEventListener('input', e => {
-        document.getElementById('success-rate-value').textContent = `${e.target.value}%`;
-        updateFutureChart(parseInt(e.target.value));
-    });
+    if (successSlider) {
+        successSlider.addEventListener('input', e => {
+            document.getElementById('success-rate-value').textContent = `${e.target.value}%`;
+            updateFutureChart(parseInt(e.target.value));
+        });
+    }
 
     // --- INITIALIZATION ---
     function init() {
-        navigate('dashboard');
+        // Only initialize components that exist on the current page
         createStatsChart();
         createFutureChart();
         createMarketChart();
