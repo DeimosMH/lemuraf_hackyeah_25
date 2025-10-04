@@ -37,11 +37,11 @@
 - **Cultural Exchange Missions**: Structured local community engagement
 - **Social Filtering**: Category-based event exploration
 
-### Blueprint - Technical Architecture
+### Investors - Investment Opportunity
 - **Market Analysis**: $240B+ opportunity across target markets
-- **Innovation Pipeline**: Three proprietary ML systems
-- **Technical Roadmap**: Phased implementation strategy
-- **Investment Thesis**: Comprehensive opportunity analysis
+- **Investment Thesis**: Comprehensive business model and growth strategy
+- **Technical Architecture**: Innovation pipeline and scalable technology
+- **Growth Projections**: Market expansion and revenue opportunities
 
 ## 🏗️ Technical Architecture
 
@@ -121,7 +121,6 @@ Odyssey/
 ├── logistics.html      # Transport and travel planning
 ├── simulator.html      # Future self projections
 ├── community.html      # Social features and events
-├── blueprint.html      # Technical documentation
 ├── investors.html      # Investment deck and analysis
 ├── app.js             # Core application logic
 └── README.md          # This documentation
