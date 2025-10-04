@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odyssey: Routine - The Life Navigation RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 40vh;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 50vh;
+            }
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            color: #0ea5e9;
+            border-bottom-color: #0ea5e9;
+        }
+        .tooltip-custom {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted #475569;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="app-container" class="min-h-screen">
+
+        <header class="bg-white shadow-sm sticky top-0 z-10">
+            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <a href="index.html" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                            <span class="text-2xl font-bold text-sky-600">O</span>
+                            <h1 class="text-xl font-bold text-slate-800">Odyssey</h1>
+                        </a>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="dashboard.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="dashboard">Summary</a>
+                        <a href="life_run.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="simulator">Life run</a>
+                        <a href="events.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="events">Events</a>
+                        <a href="routine.html" class="nav-link text-sky-500 border-b-2 border-sky-500 pb-1 font-semibold" data-section="routine">Routine</a>
+                        <a href="accomplishments.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="accomplishments">Accomplishments</a>
+                    </div>
+                    <div class="md:hidden">
+                         <button id="mobile-menu-button" class="text-slate-600 hover:text-sky-500">
+                             <span class="text-xl">☰</span>
+                         </button>
+                    </div>
+                </div>
+                 <div id="mobile-menu" class="md:hidden hidden flex flex-col space-y-2 pb-4">
+                    <a href="dashboard.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="dashboard">Summary</a>
+                    <a href="life_run.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="simulator">Life run</a>
+                    <a href="events.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="events">Events</a>
+                    <a href="routine.html" class="nav-link text-sky-500 block px-2 py-1 font-semibold" data-section="routine">Routine</a>
+                    <a href="accomplishments.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="accomplishments">Accomplishments</a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <section id="routine" class="app-section">
+                <h2 class="text-3xl font-bold mb-2">Routine: Habits, Sleep & Health</h2>
+                <p class="text-slate-500 mb-8">Build sustainable habits, monitor your sleep patterns, and track your health metrics for optimal vitality and resilience.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+                            <h3 class="text-2xl font-bold mb-4">Sleep Monitoring</h3>
+                            <p class="text-slate-500 mb-4">Track your sleep quality and get personalized recommendations for better rest.</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-sky-600">7.2h</div>
+                                    <p class="text-sm text-slate-500">Average Sleep</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-emerald-600">85%</div>
+                                    <p class="text-sm text-slate-500">Sleep Quality</p>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-sm font-semibold">Recommendation:</p>
+                                <p class="text-sm text-slate-600">Maintain consistent bedtime. Consider reducing screen time 1 hour before sleep.</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-2xl font-bold mb-4">Health Control</h3>
+                            <p class="text-slate-500 mb-4">Monitor vital signs and get health insights based on your activity and habits.</p>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-red-600">72</div>
+                                    <p class="text-sm text-slate-500">Resting HR</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-blue-600">98%</div>
+                                    <p class="text-sm text-slate-500">SpO2</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-green-600">120/80</div>
+                                    <p class="text-sm text-slate-500">Blood Pressure</p>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-sm font-semibold">Health Status:</p>
+                                <p class="text-sm text-slate-600">Good overall health. Focus on increasing daily steps for better cardiovascular fitness.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-2xl font-bold mb-4">Habits Tracking</h3>
+                            <p class="text-slate-500 mb-4">Build and maintain positive habits with streak tracking and rewards.</p>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-semibold">Morning Workout</p>
+                                        <p class="text-sm text-slate-500">Streak: 12 days</p>
+                                    </div>
+                                    <input type="checkbox" checked class="h-5 w-5 text-sky-600">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-semibold">Read 30 mins</p>
+                                        <p class="text-sm text-slate-500">Streak: 8 days</p>
+                                    </div>
+                                    <input type="checkbox" checked class="h-5 w-5 text-sky-600">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-semibold">Meditate</p>
+                                        <p class="text-sm text-slate-500">Streak: 5 days</p>
+                                    </div>
+                                    <input type="checkbox" class="h-5 w-5 text-sky-600">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-semibold">Healthy Meal Prep</p>
+                                        <p class="text-sm text-slate-500">Streak: 0 days</p>
+                                    </div>
+                                    <input type="checkbox" class="h-5 w-5 text-sky-600">
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 bg-emerald-50 rounded-lg">
+                                <p class="text-sm font-semibold text-emerald-800">Habit Reward:</p>
+                                <p class="text-sm text-emerald-700">Complete 3 habits today to earn +25 XP bonus!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+</html>

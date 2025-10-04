@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Odyssey: Summary - The Life Navigation RPG</title>
+    <title>Odyssey: Events - The Life Navigation RPG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,9 +53,9 @@
                         </a>
                     </div>
                     <div class="hidden md:flex items-center space-x-8">
-                        <a href="dashboard.html" class="nav-link text-sky-500 border-b-2 border-sky-500 pb-1 font-semibold" data-section="dashboard">Summary</a>
+                        <a href="dashboard.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="dashboard">Summary</a>
                         <a href="life_run.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="simulator">Life run</a>
-                        <a href="events.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="events">Events</a>
+                        <a href="events.html" class="nav-link text-sky-500 border-b-2 border-sky-500 pb-1 font-semibold" data-section="events">Events</a>
                         <a href="routine.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="routine">Routine</a>
                         <a href="accomplishments.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="accomplishments">Accomplishments</a>
                     </div>
@@ -66,60 +66,45 @@
                     </div>
                 </div>
                  <div id="mobile-menu" class="md:hidden hidden flex flex-col space-y-2 pb-4">
-                    <a href="dashboard.html" class="nav-link text-sky-500 block px-2 py-1 font-semibold" data-section="dashboard">Summary</a>
+                    <a href="dashboard.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="dashboard">Summary</a>
                     <a href="life_run.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="simulator">Life run</a>
-                    <a href="events.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="events">Events</a>
+                    <a href="events.html" class="nav-link text-sky-500 block px-2 py-1 font-semibold" data-section="events">Events</a>
                     <a href="routine.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="routine">Routine</a>
                     <a href="accomplishments.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="accomplishments">Accomplishments</a>
                 </div>
             </nav>
         </header>
 
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
-            <div id="background-tree" class="absolute bottom-0 right-0 pointer-events-none z-0">
-                <svg width="150" height="200" viewBox="0 0 150 200">
-                    <path d="M75 200 L65 170 L85 170 Z" fill="#22c55e"/>
-                    <path d="M75 170 L55 140 L95 140 Z" fill="#16a34a"/>
-                    <path d="M75 140 L45 110 L105 110 Z" fill="#15803d"/>
-                    <rect x="72" y="110" width="6" height="30" fill="#92400e"/>
-                </svg>
-            </div>
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-            <section id="dashboard" class="app-section">
-                <p class="text-slate-500 mb-6">The Dashboard is your <strong>Integrated Life OS</strong>, unifying transport, health, and social achievements into a single gamified interface. Completing the daily <strong>Quests</strong> drives progression.</p>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="lg:col-span-2">
-                        <div class="bg-white p-6 rounded-xl shadow-md">
-                            <h2 class="text-2xl font-bold mb-1">Character Sheet</h2>
-                            <p class="text-slate-500 mb-4">This is your core self. Improvements here are the direct result of the <strong>cross-system experience point (XP)</strong> system.</p>
-                            <div class="chart-container max-w-lg mx-auto">
-                                <canvas id="statsChart"></canvas>
-                            </div>
+            <section id="events" class="app-section">
+                <h2 class="text-3xl font-bold mb-2">Events: Activity & Travel</h2>
+                <p class="text-slate-500 mb-8">Discover local activities and plan your travels with predictive intelligence and community recommendations.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4">Travel Planning</h3>
+                        <div id="trip-list" class="space-y-4 mb-6"></div>
+                        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+                            <h3 class="text-xl font-bold mb-4">Crowdsourced Data Verification</h3>
+                            <p class="text-sm text-slate-500 mb-4">Help improve predictions. Verifying reports grants micro-rewards.</p>
+                            <div id="crowdsource-list"></div>
                         </div>
+                        <h3 class="text-2xl font-bold mb-4">Travel Quests</h3>
+                        <div id="travel-quest-list" class="space-y-4"></div>
                     </div>
                     <div>
-                        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 id="char-level" class="text-lg font-bold">Alex <span class="text-sm font-medium text-slate-500">Lv. 12</span></h3>
-                                    <p class="text-xs font-bold text-amber-600 mt-1">Evasion Points: <span id="evasion-points">0</span></p>
-                                </div>
-                                <div class="text-right">
-                                     <p class="text-lg font-bold text-yellow-500 tooltip-custom" title="Acquired by improving PROSPERITY">
-                                        <span id="char-gold">150</span> G
-                                     </p>
-                                </div>
+                        <h3 class="text-2xl font-bold mb-4">Local Activities</h3>
+                        <div class="mb-6">
+                            <h4 class="text-lg font-semibold mb-3">Filter by Interest</h4>
+                            <div id="interest-tags" class="flex flex-wrap gap-2">
+                                <button class="interest-tag bg-sky-500 text-white px-4 py-1 rounded-full text-sm font-semibold" data-interest="all">All</button>
+                                <button class="interest-tag bg-white text-slate-600 px-4 py-1 rounded-full text-sm font-semibold border border-slate-300 hover:bg-slate-100" data-interest="hiking">Hiking</button>
+                                <button class="interest-tag bg-white text-slate-600 px-4 py-1 rounded-full text-sm font-semibold border border-slate-300 hover:bg-slate-100" data-interest="coding">Coding</button>
+                                <button class="interest-tag bg-white text-slate-600 px-4 py-1 rounded-full text-sm font-semibold border border-slate-300 hover:bg-slate-100" data-interest="photography">Photography</button>
+                                <button class="interest-tag bg-white text-slate-600 px-4 py-1 rounded-full text-sm font-semibold border border-slate-300 hover:bg-slate-100" data-interest="reading">Reading</button>
                             </div>
-                             <p class="text-sm text-slate-500 mb-2 mt-3">Experience Points</p>
-                            <div class="w-full bg-slate-200 rounded-full h-4">
-                                <div id="xp-bar" class="bg-sky-500 h-4 rounded-full transition-all duration-500" style="width: 45%;"></div>
-                            </div>
-                             <p id="xp-text" class="text-right text-sm text-slate-500 mt-1">450 / 1000 XP</p>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-md">
-                            <h2 class="text-2xl font-bold mb-4">Daily Quests</h2>
-                            <div id="quest-list" class="space-y-4"></div>
-                        </div>
+                        <div id="event-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
                     </div>
                 </div>
             </section>

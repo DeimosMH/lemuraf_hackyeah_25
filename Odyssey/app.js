@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTravelQuests();
         renderEvents();
         updateStatsChart();
+        updateBackgroundTree();
     }
     
     function renderCharacterSheet() {
@@ -343,6 +344,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (statsChart) {
             statsChart.data.datasets[0].data = Object.values(state.character.stats);
             statsChart.update();
+        }
+    }
+
+    function updateBackgroundTree() {
+        const tree = document.getElementById('background-tree');
+        if (tree) {
+            const completed = state.quests.filter(q => q.done).length;
+            const growth = Math.max(0.3, completed / state.quests.length);
+            tree.style.transform = `scale(${growth})`;
         }
     }
 
