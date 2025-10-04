@@ -54,15 +54,15 @@
 
     <header id="header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-[#F8F7F4]/80 backdrop-blur-sm">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold font-serif text-[#333333]">Odyssey</a>
+            <a href="index.html" class="text-2xl font-bold font-serif text-[#333333] hover:text-[#8A9A5B] transition-colors">Odyssey</a>
             <nav class="hidden md:flex items-center space-x-6">
                 <a href="#features" class="text-gray-600 hover:text-[#8A9A5B] transition-colors">Features</a>
                 <a href="#vision" class="text-gray-600 hover:text-[#8A9A5B] transition-colors">The Vision</a>
                 <a href="#investors" class="text-gray-600 hover:text-[#8A9A5B] transition-colors">For Investors</a>
             </nav>
             <div class="hidden md:flex items-center space-x-4">
-                 <a href="#login" class="text-[#8A9A5B] font-semibold hover:underline">Login</a>
-                 <a href="#investors" class="btn-primary">Dashboard</a>
+                 <a href="dashboard.html" class="text-[#8A9A5B] font-semibold hover:underline">Login</a>
+                 <a href="dashboard.html" class="btn-primary">Dashboard</a>
             </div>
             <button id="mobile-menu-button" class="md:hidden text-2xl">☰</button>
         </div>
@@ -71,7 +71,7 @@
             <a href="#vision" class="text-gray-600 hover:text-[#8A9A5B] transition-colors">The Vision</a>
             <a href="#investors" class="text-gray-600 hover:text-[#8A9A5B] transition-colors">For Investors</a>
             <a href="#login" class="text-[#8A9A5B] font-semibold hover:underline">Login</a>
-            <a href="#investors" class="btn-primary text-center">Dashboard</a>
+            <a href="dashboard.html" class="btn-primary text-center">Dashboard</a>
         </div>
     </header>
 
@@ -80,9 +80,27 @@
             <div class="container mx-auto px-6 text-center">
                 <h1 class="text-4xl md:text-6xl font-bold font-serif text-[#333333] leading-tight">Level Up Your Life.</h1>
                 <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">Odyssey transforms your goals, habits, and daily challenges into an epic Role-Playing Game, empowering you to navigate your future with purpose and clarity.</p>
-                <div class="mt-8 flex justify-center items-center space-x-4">
-                    <a href="#investors" class="btn-primary">Join the Beta</a>
-                    <a href="#features" class="btn-secondary">Learn More</a>
+                <div class="mt-8 flex flex-col items-center space-y-6">
+                    <div class="flex justify-center items-center space-x-4">
+                        <a href="dashboard.html" class="btn-primary">Launch Dashboard</a>
+                        <a href="#features" class="btn-secondary">Learn More</a>
+                    </div>
+                    <div class="flex justify-center items-center space-x-4">
+                        <a href="#" class="flex items-center bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                            <span class="mr-2">📱</span>
+                            <div class="text-left">
+                                <div class="text-xs">Download on the</div>
+                                <div class="text-sm font-semibold">App Store</div>
+                            </div>
+                        </a>
+                        <a href="#" class="flex items-center bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                            <span class="mr-2">🤖</span>
+                            <div class="text-left">
+                                <div class="text-xs">Get it on</div>
+                                <div class="text-sm font-semibold">Google Play</div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
