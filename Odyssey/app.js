@@ -874,8 +874,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Auto-generate AI plan and show payment
-        autoPlanEvent(event);
+        // Open modal and show AI planning for existing event (no form needed)
+        openEventPlanningModalForExisting(event);
     }
 
     function autoPlanEvent(event) {
@@ -895,6 +895,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function openEventPlanningModal(event = null) {
         const modal = document.getElementById('event-planning-modal');
 
+        // Show form section for new events
+        document.getElementById('event-form-section').classList.remove('hidden');
+        document.getElementById('ai-planning-section').classList.add('hidden');
+        document.getElementById('event-info-section').classList.add('hidden');
+
         // Pre-fill form if event data is provided
         if (event) {
             document.getElementById('event-name').value = event.name;
@@ -909,13 +914,74 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('hidden');
     }
 
+    function openEventPlanningModalForExisting(event) {
+        const modal = document.getElementById('event-planning-modal');
+
+        // Hide form section, show AI planning section for existing events
+        document.getElementById('event-form-section').classList.add('hidden');
+        document.getElementById('ai-planning-section').classList.remove('hidden');
+
+        // Show event info
+        const eventInfoDetails = document.getElementById('event-info-details');
+        eventInfoDetails.innerHTML = `
+            <strong>${event.name}</strong><br>
+            📍 ${event.location}<br>
+            🏷️ ${event.interest.charAt(0).toUpperCase() + event.interest.slice(1)} Event
+        `;
+        document.getElementById('event-info-section').classList.remove('hidden');
+
+        modal.classList.remove('hidden');
+
+        // Auto-generate AI plan for existing event
+        setTimeout(() => {
+            generatePlanForExistingEvent(event);
+        }, 1000);
+    }
+
+    function generatePlanForExistingEvent(event) {
+        // Generate event data for planning (using current time + 2 hours as default)
+        const eventData = {
+            name: event.name,
+            interest: event.interest,
+            location: event.location,
+            datetime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().slice(0, 16), // 2 hours from now
+            duration: 2 // default 2 hours
+        };
+
+        // Simulate AI processing time
+        setTimeout(() => {
+            const plan = createDetailedPlan(eventData);
+            state.selectedEvent = event;
+            state.aiPlan = plan;
+
+            // Display the plan
+            displayAIPlanForExisting(plan);
+
+            // Hide loading, show plan
+            document.getElementById('ai-plan-container-existing').classList.remove('hidden');
+        }, 2000);
+    }
+
+    function displayAIPlanForExisting(plan) {
+        document.getElementById('data-analysis-existing').innerHTML = plan.dataAnalysis;
+        document.getElementById('optimal-schedule-existing').innerHTML = plan.optimalSchedule;
+        document.getElementById('smart-recommendations-existing').innerHTML = plan.smartRecommendations;
+        document.getElementById('cost-breakdown-existing').innerHTML = plan.costBreakdown;
+    }
+
     function closeEventPlanningModal() {
         const modal = document.getElementById('event-planning-modal');
         modal.classList.add('hidden');
 
-        // Reset form and hide AI plan
+        // Reset form and hide AI plan sections
         document.getElementById('event-form').reset();
         document.getElementById('ai-plan-container').classList.add('hidden');
+        document.getElementById('ai-plan-container-existing').classList.add('hidden');
+
+        // Hide all sections
+        document.getElementById('event-form-section').classList.add('hidden');
+        document.getElementById('ai-planning-section').classList.add('hidden');
+        document.getElementById('event-info-section').classList.add('hidden');
 
         // Clear state
         state.aiPlan = null;
@@ -1052,6 +1118,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (rejectPlanBtn) {
             rejectPlanBtn.addEventListener('click', handleRejectPlan);
+        }
+
+        // Set up existing event plan action handlers
+        const acceptPlanExistingBtn = document.getElementById('accept-plan-existing');
+        const rejectPlanExistingBtn = document.getElementById('reject-plan-existing');
+        if (acceptPlanExistingBtn) {
+            acceptPlanExistingBtn.addEventListener('click', handleAcceptPlan);
+        }
+        if (rejectPlanExistingBtn) {
+            rejectPlanExistingBtn.addEventListener('click', closeEventPlanningModal);
         }
 
         // Set up payment modal handlers

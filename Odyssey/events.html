@@ -125,7 +125,14 @@
                             <button id="close-planning-modal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
                         </div>
 
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Event Info Section (shown when planning existing event) -->
+                        <div id="event-info-section" class="bg-slate-50 p-4 rounded-lg mb-6 hidden">
+                            <h4 class="font-semibold mb-2">Planning Event</h4>
+                            <div id="event-info-details" class="text-sm text-slate-600"></div>
+                        </div>
+
+                        <!-- Form Section (only shown for new events) -->
+                        <div id="event-form-section" class="grid grid-cols-1 lg:grid-cols-2 gap-6 hidden">
                             <div>
                                 <h4 class="text-lg font-semibold mb-3">Event Details</h4>
                                 <form id="event-form" class="space-y-4">
@@ -198,6 +205,47 @@
                                                     Reject
                                                 </button>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Planning Section (shown when planning existing event) -->
+                        <div id="ai-planning-section" class="hidden">
+                            <div class="text-center mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Generating AI Plan...</h4>
+                                <div class="flex items-center justify-center space-x-2">
+                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-sky-600"></div>
+                                    <p class="text-sky-600 font-semibold">Retrieving weather data, analyzing habits, and creating optimal plan...</p>
+                                </div>
+                            </div>
+                            <div id="ai-plan-container-existing" class="bg-slate-50 p-4 rounded-lg min-h-[300px] hidden">
+                                <div id="ai-plan-content-existing" class="hidden">
+                                    <div class="space-y-4">
+                                        <div class="bg-blue-50 p-3 rounded-lg">
+                                            <h5 class="font-semibold text-blue-800 mb-2">📊 Data Analysis</h5>
+                                            <div id="data-analysis-existing" class="text-sm text-blue-700"></div>
+                                        </div>
+                                        <div class="bg-green-50 p-3 rounded-lg">
+                                            <h5 class="font-semibold text-green-800 mb-2">🗓️ Optimal Schedule</h5>
+                                            <div id="optimal-schedule-existing" class="text-sm text-green-700"></div>
+                                        </div>
+                                        <div class="bg-purple-50 p-3 rounded-lg">
+                                            <h5 class="font-semibold text-purple-800 mb-2">⚡ Smart Recommendations</h5>
+                                            <div id="smart-recommendations-existing" class="text-sm text-purple-700"></div>
+                                        </div>
+                                        <div class="bg-amber-50 p-3 rounded-lg">
+                                            <h5 class="font-semibold text-amber-800 mb-2">💰 Cost Breakdown</h5>
+                                            <div id="cost-breakdown-existing" class="text-sm text-amber-700"></div>
+                                        </div>
+                                        <div class="flex space-x-3">
+                                            <button id="accept-plan-existing" class="flex-1 bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700 transition-colors">
+                                                Accept Plan
+                                            </button>
+                                            <button id="reject-plan-existing" class="flex-1 bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-md hover:bg-slate-400 transition-colors">
+                                                Cancel
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
