@@ -59,8 +59,8 @@
                         </a>
                     </div>
                     <div class="hidden md:flex items-center space-x-8">
-                        <button class="nav-link tab-button active text-sky-500 border-b-2 border-sky-500 pb-1 font-semibold" data-tab="summary">Summary</button>
-                        <button class="nav-link tab-button text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-tab="simulator">Life run</button>
+                        <button class="nav-link tab-button active text-sky-500 border-b-2 border-sky-500 pb-1 font-semibold" data-tab="summary">Dashboard</button>
+                        <button class="nav-link tab-button text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-tab="simulator">Simulator</button>
                         <button class="nav-link tab-button text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-tab="wallet">Wallet</button>
                         <button class="nav-link tab-button text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-tab="events">Events</button>
                         <button class="nav-link tab-button text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-tab="routine">Routine</button>
@@ -73,8 +73,8 @@
                     </div>
                 </div>
                  <div id="mobile-menu" class="md:hidden hidden flex flex-col space-y-2 pb-4">
-                    <button class="nav-link tab-button active text-sky-500 block px-2 py-1 font-semibold" data-tab="summary">Summary</button>
-                    <button class="nav-link tab-button text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-tab="simulator">Life run</button>
+                    <button class="nav-link tab-button active text-sky-500 block px-2 py-1 font-semibold" data-tab="summary">Dashboard</button>
+                    <button class="nav-link tab-button text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-tab="simulator">Simulator</button>
                     <button class="nav-link tab-button text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-tab="wallet">Wallet</button>
                     <button class="nav-link tab-button text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-tab="events">Events</button>
                     <button class="nav-link tab-button text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-tab="routine">Routine</button>
@@ -257,11 +257,13 @@
                     if (!tab) return;
 
                     if (tab === 'summary') {
+                        // Show dashboard content, hide wallet content
                         const summaryTab = document.getElementById('summary-tab');
                         const walletTab = document.getElementById('wallet-tab');
                         if (summaryTab) summaryTab.classList.remove('hidden');
                         if (walletTab) walletTab.classList.add('hidden');
                     } else if (tab === 'wallet') {
+                        // Show wallet content, hide dashboard content
                         const summaryTab = document.getElementById('summary-tab');
                         const walletTab = document.getElementById('wallet-tab');
                         if (summaryTab) summaryTab.classList.add('hidden');
@@ -277,13 +279,16 @@
                         window.location.href = pageMap[tab] || tab + '.html';
                         return;
                     }
-                    // Update active class
+
+                    // Update active state for all tab buttons
                     tabButtons.forEach(btn => {
                         if (btn) {
                             btn.classList.remove('active', 'text-sky-500', 'border-sky-500');
                             btn.classList.add('text-slate-600', 'border-transparent');
                         }
                     });
+
+                    // Set active state for clicked button
                     if (button) {
                         button.classList.add('active', 'text-sky-500', 'border-sky-500');
                         button.classList.remove('text-slate-600', 'border-transparent');

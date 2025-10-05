@@ -53,11 +53,12 @@
                         </a>
                     </div>
                     <div class="hidden md:flex items-center space-x-8">
-                        <a href="character.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="character">Character</a>
-                        <a href="wallet.html" class="nav-link text-sky-500 border-b-2 border-sky-500 pb-1 font-semibold" data-section="wallet">Wallet</a>
-                        <a href="oracle.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="oracle">Oracle</a>
-                        <a href="simulator.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="simulator">Life Run</a>
-                        <a href="guild_hall.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="guild_hall">Guild Hall</a>
+                        <button class="nav-link tab-button text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-tab="summary">Dashboard</button>
+                        <button class="nav-link tab-button text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-tab="simulator">Simulator</button>
+                        <button class="nav-link tab-button active text-sky-500 border-b-2 border-sky-500 pb-1 font-semibold" data-tab="wallet">Wallet</button>
+                        <button class="nav-link tab-button text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-tab="events">Events</button>
+                        <button class="nav-link tab-button text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-tab="routine">Routine</button>
+                        <button class="nav-link tab-button text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-tab="accomplishments">Accomplishments</button>
                     </div>
                     <div class="md:hidden">
                          <button id="mobile-menu-button" class="text-slate-600 hover:text-sky-500">
@@ -66,18 +67,61 @@
                     </div>
                 </div>
                  <div id="mobile-menu" class="md:hidden hidden flex flex-col space-y-2 pb-4">
-                    <a href="character.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="character">Character</a>
-                    <a href="wallet.html" class="nav-link text-sky-500 block px-2 py-1 font-semibold" data-section="wallet">Wallet</a>
-                    <a href="oracle.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="oracle">Oracle</a>
-                    <a href="simulator.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="simulator">Life Run</a>
-                    <a href="guild_hall.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="guild_hall">Guild Hall</a>
-                </div>
+                    <button class="nav-link tab-button text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-tab="summary">Dashboard</button>
+                    <button class="nav-link tab-button text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-tab="simulator">Simulator</button>
+                    <button class="nav-link tab-button active text-sky-500 block px-2 py-1 font-semibold" data-tab="wallet">Wallet</button>
+                    <button class="nav-link tab-button text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-tab="events">Events</button>
+                    <button class="nav-link tab-button text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-tab="routine">Routine</button>
+                    <button class="nav-link tab-button text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-tab="accomplishments">Accomplishments</button>
+                 </div>
             </nav>
         </header>
 
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
 
-            <section id="wallet" class="app-section">
+            <div id="summary-tab" class="tab-content hidden">
+                <section id="dashboard" class="app-section">
+                    <p class="text-slate-500 mb-6">The Dashboard is your <strong>Integrated Life OS</strong>, unifying transport, health, and social achievements into a single gamified interface. Completing the daily <strong>Quests</strong> drives progression.</p>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2">
+                            <div class="bg-white p-6 rounded-xl shadow-md">
+                                <h2 class="text-2xl font-bold mb-1">Character Sheet</h2>
+                                <p class="text-slate-500 mb-4">This is your core self. Improvements here are the direct result of the <strong>cross-system experience point (XP)</strong> system.</p>
+                                <div class="chart-container max-w-lg mx-auto">
+                                    <canvas id="statsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 id="char-level" class="text-lg font-bold">Alex <span class="text-sm font-medium text-slate-500">Lv. 12</span></h3>
+                                        <p class="text-xs font-bold text-amber-600 mt-1">Evasion Points: <span id="evasion-points">0</span></p>
+                                    </div>
+                                    <div class="text-right">
+                                         <p class="text-lg font-bold text-yellow-500 tooltip-custom" title="Acquired by improving PROSPERITY">
+                                            <span id="char-gold">150</span> G
+                                         </p>
+                                    </div>
+                                </div>
+                                 <p class="text-sm text-slate-500 mb-2 mt-3">Experience Points</p>
+                                <div class="w-full bg-slate-200 rounded-full h-4">
+                                    <div id="xp-bar" class="bg-sky-500 h-4 rounded-full transition-all duration-500" style="width: 45%;"></div>
+                                </div>
+                                 <p id="xp-text" class="text-right text-sm text-slate-500 mt-1">450 / 1000 XP</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-md">
+                                <h2 class="text-2xl font-bold mb-4">Daily Quests</h2>
+                                <div id="quest-list" class="space-y-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="wallet-tab" class="tab-content">
+                <section id="wallet" class="app-section">
                 <h2 class="text-3xl font-bold mb-2">Wallet: Integrated Commerce System</h2>
                 <p class="text-slate-500 mb-8">Manage payments, book services, and optimize spending with intelligent commerce features and gamified rewards.</p>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -193,11 +237,61 @@
                     </div>
                 </div>
             </section>
+        </div>
 
-        </main>
+    </main>
     </div>
 
     <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tab = button?.dataset?.tab;
+                    if (!tab) return;
+
+                    if (tab === 'summary') {
+                        // Show dashboard content, hide wallet content
+                        const summaryTab = document.getElementById('summary-tab');
+                        const walletTab = document.getElementById('wallet-tab');
+                        if (summaryTab) summaryTab.classList.remove('hidden');
+                        if (walletTab) walletTab.classList.add('hidden');
+                    } else if (tab === 'wallet') {
+                        // Show wallet content, hide dashboard content
+                        const summaryTab = document.getElementById('summary-tab');
+                        const walletTab = document.getElementById('wallet-tab');
+                        if (summaryTab) summaryTab.classList.add('hidden');
+                        if (walletTab) walletTab.classList.remove('hidden');
+                    } else {
+                        // Redirect to appropriate page for other tabs
+                        const pageMap = {
+                            'simulator': 'simulator.html',
+                            'events': 'events.html',
+                            'routine': 'routine.html',
+                            'accomplishments': 'accomplishments.html'
+                        };
+                        window.location.href = pageMap[tab] || tab + '.html';
+                        return;
+                    }
+
+                    // Update active state for all tab buttons
+                    tabButtons.forEach(btn => {
+                        if (btn) {
+                            btn.classList.remove('active', 'text-sky-500', 'border-sky-500');
+                            btn.classList.add('text-slate-600', 'border-transparent');
+                        }
+                    });
+
+                    // Set active state for clicked button
+                    if (button) {
+                        button.classList.add('active', 'text-sky-500', 'border-sky-500');
+                        button.classList.remove('text-slate-600', 'border-transparent');
+                    }
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>
