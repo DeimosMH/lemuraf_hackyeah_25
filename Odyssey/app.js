@@ -915,27 +915,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openEventPlanningModalForExisting(event) {
-        const modal = document.getElementById('event-planning-modal');
+        try {
+            const modal = document.getElementById('event-planning-modal');
+            if (!modal) {
+                console.error('Modal not found');
+                return;
+            }
 
-        // Hide form section, show AI planning section for existing events
-        document.getElementById('event-form-section').classList.add('hidden');
-        document.getElementById('ai-planning-section').classList.remove('hidden');
+            // Hide form section, show AI planning section for existing events
+            const formSection = document.getElementById('event-form-section');
+            const aiSection = document.getElementById('ai-planning-section');
+            const eventInfoSection = document.getElementById('event-info-section');
 
-        // Show event info
-        const eventInfoDetails = document.getElementById('event-info-details');
-        eventInfoDetails.innerHTML = `
-            <strong>${event.name}</strong><br>
-            📍 ${event.location}<br>
-            🏷️ ${event.interest.charAt(0).toUpperCase() + event.interest.slice(1)} Event
-        `;
-        document.getElementById('event-info-section').classList.remove('hidden');
+            if (formSection) formSection.classList.add('hidden');
+            if (aiSection) aiSection.classList.remove('hidden');
+            if (eventInfoSection) eventInfoSection.classList.remove('hidden');
 
-        modal.classList.remove('hidden');
+            // Show event info
+            const eventInfoDetails = document.getElementById('event-info-details');
+            if (eventInfoDetails) {
+                eventInfoDetails.innerHTML = `
+                    <strong>${event.name}</strong><br>
+                    📍 ${event.location}<br>
+                    🏷️ ${event.interest.charAt(0).toUpperCase() + event.interest.slice(1)} Event
+                `;
+            }
 
-        // Auto-generate AI plan for existing event
-        setTimeout(() => {
-            generatePlanForExistingEvent(event);
-        }, 1000);
+            modal.classList.remove('hidden');
+            console.log('Modal opened for existing event:', event.name);
+
+            // Auto-generate AI plan for existing event
+            setTimeout(() => {
+                generatePlanForExistingEvent(event);
+            }, 1000);
+        } catch (error) {
+            console.error('Error opening modal:', error);
+            alert('Error opening planning modal. Please try again.');
+        }
     }
 
     function generatePlanForExistingEvent(event) {
@@ -948,44 +964,113 @@ document.addEventListener('DOMContentLoaded', () => {
             duration: 2 // default 2 hours
         };
 
-        // Simulate AI processing time
+        // Simulate AI processing time (1 second)
+        console.log('Starting 1-second timeout for plan generation');
         setTimeout(() => {
-            const plan = createDetailedPlan(eventData);
-            state.selectedEvent = event;
-            state.aiPlan = plan;
+            try {
+                console.log('Timeout executed, generating plan...');
+                const plan = createDetailedPlan(eventData);
+                state.selectedEvent = event;
+                state.aiPlan = plan;
 
-            // Display the plan
-            displayAIPlanForExisting(plan);
+                console.log('Plan generated, displaying...');
+                // Display the plan
+                displayAIPlanForExisting(plan);
 
-            // Hide loading, show plan
-            document.getElementById('ai-plan-container-existing').classList.remove('hidden');
-        }, 2000);
+                // Hide loading, show plan content
+                const container = document.getElementById('ai-plan-container-existing');
+                const content = document.getElementById('ai-plan-content-existing');
+
+                console.log('Before showing - Container hidden?', container?.classList.contains('hidden'));
+                console.log('Before showing - Content hidden?', content?.classList.contains('hidden'));
+
+                if (container) {
+                    container.classList.remove('hidden');
+                    console.log('Container shown, hidden?', container.classList.contains('hidden'));
+                }
+                if (content) {
+                    content.classList.remove('hidden');
+                    console.log('Content shown, hidden?', content.classList.contains('hidden'));
+                }
+
+                console.log('Plan generated successfully:', plan);
+            } catch (error) {
+                console.error('Error generating plan:', error);
+                alert('Error generating plan. Please try again.');
+            }
+        }, 1000);
     }
 
     function displayAIPlanForExisting(plan) {
-        document.getElementById('data-analysis-existing').innerHTML = plan.dataAnalysis;
-        document.getElementById('optimal-schedule-existing').innerHTML = plan.optimalSchedule;
-        document.getElementById('smart-recommendations-existing').innerHTML = plan.smartRecommendations;
-        document.getElementById('cost-breakdown-existing').innerHTML = plan.costBreakdown;
+        try {
+            console.log('Starting to display plan:', plan);
+
+            // Safely update DOM elements with null checks
+            const dataAnalysisEl = document.getElementById('data-analysis-existing');
+            const scheduleEl = document.getElementById('optimal-schedule-existing');
+            const recommendationsEl = document.getElementById('smart-recommendations-existing');
+            const costBreakdownEl = document.getElementById('cost-breakdown-existing');
+
+            console.log('Found elements:', {
+                dataAnalysisEl,
+                scheduleEl,
+                recommendationsEl,
+                costBreakdownEl
+            });
+
+            if (dataAnalysisEl) {
+                dataAnalysisEl.innerHTML = plan.dataAnalysis;
+                console.log('Data analysis set');
+            }
+            if (scheduleEl) {
+                scheduleEl.innerHTML = plan.optimalSchedule;
+                console.log('Schedule set');
+            }
+            if (recommendationsEl) {
+                recommendationsEl.innerHTML = plan.smartRecommendations;
+                console.log('Recommendations set');
+            }
+            if (costBreakdownEl) {
+                costBreakdownEl.innerHTML = plan.costBreakdown;
+                console.log('Cost breakdown set');
+            }
+
+            console.log('Plan displayed successfully');
+        } catch (error) {
+            console.error('Error displaying plan:', error);
+        }
     }
 
     function closeEventPlanningModal() {
-        const modal = document.getElementById('event-planning-modal');
-        modal.classList.add('hidden');
+        try {
+            const modal = document.getElementById('event-planning-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
 
-        // Reset form and hide AI plan sections
-        document.getElementById('event-form').reset();
-        document.getElementById('ai-plan-container').classList.add('hidden');
-        document.getElementById('ai-plan-container-existing').classList.add('hidden');
+            // Reset form and hide AI plan sections with null checks
+            const eventForm = document.getElementById('event-form');
+            const aiContainer = document.getElementById('ai-plan-container');
+            const aiContainerExisting = document.getElementById('ai-plan-container-existing');
+            const formSection = document.getElementById('event-form-section');
+            const aiSection = document.getElementById('ai-planning-section');
+            const eventInfoSection = document.getElementById('event-info-section');
 
-        // Hide all sections
-        document.getElementById('event-form-section').classList.add('hidden');
-        document.getElementById('ai-planning-section').classList.add('hidden');
-        document.getElementById('event-info-section').classList.add('hidden');
+            if (eventForm) eventForm.reset();
+            if (aiContainer) aiContainer.classList.add('hidden');
+            if (aiContainerExisting) aiContainerExisting.classList.add('hidden');
+            if (formSection) formSection.classList.add('hidden');
+            if (aiSection) aiSection.classList.add('hidden');
+            if (eventInfoSection) eventInfoSection.classList.add('hidden');
 
-        // Clear state
-        state.aiPlan = null;
-        state.selectedEvent = null;
+            // Clear state
+            state.aiPlan = null;
+            state.selectedEvent = null;
+
+            console.log('Modal closed successfully');
+        } catch (error) {
+            console.error('Error closing modal:', error);
+        }
     }
 
     function showSelectedEventInfo(event) {
@@ -1108,6 +1193,22 @@ document.addEventListener('DOMContentLoaded', () => {
             eventForm.addEventListener('submit', handleEventFormSubmit);
         }
 
+        // Debug: Check modal elements exist
+        const modalElements = {
+            'event-planning-modal': document.getElementById('event-planning-modal'),
+            'event-info-section': document.getElementById('event-info-section'),
+            'ai-planning-section': document.getElementById('ai-planning-section'),
+            'ai-plan-container-existing': document.getElementById('ai-plan-container-existing'),
+            'ai-plan-content-existing': document.getElementById('ai-plan-content-existing'),
+            'data-analysis-existing': document.getElementById('data-analysis-existing'),
+            'optimal-schedule-existing': document.getElementById('optimal-schedule-existing'),
+            'smart-recommendations-existing': document.getElementById('smart-recommendations-existing'),
+            'cost-breakdown-existing': document.getElementById('cost-breakdown-existing'),
+            'accept-plan-existing': document.getElementById('accept-plan-existing'),
+            'reject-plan-existing': document.getElementById('reject-plan-existing')
+        };
+        console.log('Modal elements check:', modalElements);
+
         // Event cards are now clickable and handled in renderEvents function
 
         // Set up plan action handlers
@@ -1123,11 +1224,20 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set up existing event plan action handlers
         const acceptPlanExistingBtn = document.getElementById('accept-plan-existing');
         const rejectPlanExistingBtn = document.getElementById('reject-plan-existing');
+
+        console.log('Setting up existing event handlers:', { acceptPlanExistingBtn, rejectPlanExistingBtn });
+
         if (acceptPlanExistingBtn) {
-            acceptPlanExistingBtn.addEventListener('click', handleAcceptPlan);
+            acceptPlanExistingBtn.addEventListener('click', (e) => {
+                console.log('Accept plan clicked');
+                handleAcceptPlan();
+            });
         }
         if (rejectPlanExistingBtn) {
-            rejectPlanExistingBtn.addEventListener('click', closeEventPlanningModal);
+            rejectPlanExistingBtn.addEventListener('click', (e) => {
+                console.log('Reject plan clicked');
+                closeEventPlanningModal();
+            });
         }
 
         // Set up payment modal handlers
@@ -1144,16 +1254,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const quickPlanBtn = document.getElementById('quick-plan-event');
         const closeModalBtn = document.getElementById('close-planning-modal');
 
+        console.log('Setting up modal handlers:', { quickPlanBtn, closeModalBtn });
+
         if (quickPlanBtn) {
-            quickPlanBtn.addEventListener('click', () => openEventPlanningModal());
+            quickPlanBtn.addEventListener('click', () => {
+                console.log('Quick plan button clicked');
+                openEventPlanningModal();
+            });
         }
 
         if (closeModalBtn) {
-            closeModalBtn.addEventListener('click', closeEventPlanningModal);
+            closeModalBtn.addEventListener('click', () => {
+                console.log('Close modal button clicked');
+                closeEventPlanningModal();
+            });
         }
 
         // Close modal when clicking outside
         const planningModal = document.getElementById('event-planning-modal');
+        console.log('Setting up modal close handler:', planningModal);
         if (planningModal) {
             planningModal.addEventListener('click', (e) => {
                 if (e.target === planningModal) {
@@ -1162,6 +1281,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Debug: Check if we're on the events page
+        console.log('Initializing Odyssey app...');
+
         // Only initialize components that exist on the current page
         try {
             createStatsChart();
@@ -1169,6 +1291,7 @@ document.addEventListener('DOMContentLoaded', () => {
             createMarketChart();
             renderRoadmap();
             updateUI();
+            console.log('App initialized successfully');
         } catch (error) {
             console.warn('Error during initialization:', error);
         }
