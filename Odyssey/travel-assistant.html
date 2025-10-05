@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odyssey: Travel Assistant - The Life Navigation RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            color: #0ea5e9;
+            border-bottom-color: #0ea5e9;
+        }
+        .chat-message {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tts-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .tts-button:hover {
+            transform: scale(1.05);
+        }
+        .booking-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .booking-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .structured-response h5 {
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        .structured-response ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .structured-response li {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .structured-response li:last-child {
+            border-bottom: none;
+        }
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #0ea5e9;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+        }
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #0ea5e9;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .loading-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .loading-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        .loading-text {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        .validating-text {
+            color: #f59e0b;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        .repairing-text {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="app-container" class="min-h-screen">
+
+        <header class="bg-white shadow-sm sticky top-0 z-10">
+            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <a href="index.html" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                            <span class="text-2xl font-bold text-sky-600">O</span>
+                            <h1 class="text-xl font-bold text-slate-800">Odyssey</h1>
+                        </a>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="dashboard.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="dashboard">Dashboard</a>
+                        <a href="logistics.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="logistics">Logistics</a>
+                        <a href="simulator.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="simulator">Simulator</a>
+                        <a href="community.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="community">Community</a>
+                        <a href="travel-assistant.html" class="nav-link text-sky-500 border-b-2 border-sky-500 pb-1 font-semibold" data-section="travel-assistant">Travel Assistant</a>
+                    </div>
+                    <div class="md:hidden">
+                         <button id="mobile-menu-button" class="text-slate-600 hover:text-sky-500">
+                             <span class="text-xl">☰</span>
+                         </button>
+                    </div>
+                </div>
+                 <div id="mobile-menu" class="md:hidden hidden flex flex-col space-y-2 pb-4">
+                    <a href="dashboard.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="dashboard">Dashboard</a>
+                    <a href="logistics.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="logistics">Logistics</a>
+                    <a href="simulator.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="simulator">Simulator</a>
+                    <a href="community.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="community">Community</a>
+                    <a href="travel-assistant.html" class="nav-link text-sky-500 block px-2 py-1 font-semibold" data-section="travel-assistant">Travel Assistant</a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <section id="travel-assistant" class="app-section">
+                <h2 class="text-3xl font-bold mb-2">Travel Assistant: AI-Powered Journey Planning</h2>
+                <p class="text-slate-500 mb-8">Your personal AI travel companion suggests destinations, finds accommodations, books transport, and creates detailed itineraries with real-time tracking.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- AI Conversation Panel -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+                            <h3 class="text-xl font-bold mb-4 flex items-center">
+                                AI Travel Assistant
+                            </h3>
+                            <div id="chat-messages" class="h-64 overflow-y-auto mb-4 p-3 bg-slate-50 rounded-lg space-y-3">
+                                <div class="chat-message bg-sky-100 p-3 rounded-lg">
+                                    <p class="text-sm font-semibold text-sky-600">AI Assistant</p>
+                                    <p class="text-sm text-slate-700">Hello! I'm your AI travel assistant. Tell me about your dream destination or let me suggest something based on your preferences!</p>
+                                    <button class="tts-button text-xs bg-sky-500 text-white px-2 py-1 rounded mt-2 hover:bg-sky-600" onclick="speakText('Hello! I am your AI travel assistant. Tell me about your dream destination or let me suggest something based on your preferences!')">Speak</button>
+                                </div>
+                            </div>
+                            <!-- Loading indicator for LLM responses -->
+                            <div id="llm-loading" class="hidden">
+                                <div class="loading-container">
+                                    <div class="loading-spinner"></div>
+                                    <div class="loading-dots">
+                                        <div class="loading-dot"></div>
+                                        <div class="loading-dot"></div>
+                                        <div class="loading-dot"></div>
+                                    </div>
+                                    <div id="loading-status" class="loading-text">Thinking...</div>
+                                </div>
+                            </div>
+                            <!-- Loading indicator will be shown here -->
+                            <div class="flex space-x-2">
+                                <input type="text" id="user-input" placeholder="Tell me about your travel preferences..." class="flex-1 p-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                <button id="voice-input" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 text-sm font-semibold flex items-center justify-center">
+                                    <span id="voice-icon">Mic</span>
+                                </button>
+                                <button id="send-message" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-semibold">Send</button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Preferences -->
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-xl font-bold mb-4">Travel Preferences</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Budget Range</label>
+                                    <select id="budget-select" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                                        <option value="budget">Budget (€500-1000)</option>
+                                        <option value="mid-range">Mid-range (€1000-2500)</option>
+                                        <option value="luxury">Luxury (€2500+)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Travel Style</label>
+                                    <select id="style-select" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                                        <option value="relaxation">Relaxation & Wellness</option>
+                                        <option value="adventure">Adventure & Outdoor</option>
+                                        <option value="cultural">Cultural & Historical</option>
+                                        <option value="food">Food & Wine</option>
+                                    </select>
+                                </div>
+                                <button id="suggest-destination" class="w-full bg-emerald-500 text-white py-2 px-4 rounded-lg hover:bg-emerald-600 text-sm font-semibold">
+                                    Suggest Destination
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content Area -->
+                    <div class="lg:col-span-2">
+                        <!-- Tabbed Interface for Independent Function Access -->
+                        <div class="bg-white rounded-xl shadow-md">
+                            <div class="border-b border-slate-200">
+                                <nav class="flex space-x-8 px-6">
+                                    <button class="tab-button active py-4 px-2 border-b-2 border-sky-500 text-sky-600 font-semibold" data-tab="destinations">
+                                        Destinations
+                                    </button>
+                                    <button class="tab-button py-4 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold" data-tab="accommodations">
+                                        Accommodations
+                                    </button>
+                                    <button class="tab-button py-4 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold" data-tab="transportation">
+                                        Transportation
+                                    </button>
+                                    <button class="tab-button py-4 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold" data-tab="itinerary">
+                                        Itinerary
+                                    </button>
+                                    <button class="tab-button py-4 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold" data-tab="tracking">
+                                        Tracking
+                                    </button>
+                                </nav>
+                            </div>
+
+                            <div class="p-6">
+                                <!-- Destinations Tab -->
+                                <div id="destinations-tab" class="tab-content">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-xl font-bold">Destination Discovery</h3>
+                                        <div class="flex space-x-2">
+                                            <button id="ai-destinations" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-semibold">
+                                                AI Suggest
+                                            </button>
+                                            <button id="manual-destinations" class="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 text-sm font-semibold">
+                                                Manual Search
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- AI Destination Suggestions -->
+                                    <div id="ai-destination-section">
+                                        <p class="text-sm text-slate-600 mb-4">Let AI suggest destinations based on your preferences, or search manually below.</p>
+                                        <div id="destination-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <!-- AI suggested destination cards will be populated here -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Manual Destination Search -->
+                                    <div id="manual-destination-section" class="hidden">
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                            <input type="text" id="manual-dest-name" placeholder="Destination name..." class="p-2 border border-slate-300 rounded-lg text-sm">
+                                            <select id="manual-dest-type" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="">All Types</option>
+                                                <option value="cultural">Cultural</option>
+                                                <option value="relaxation">Relaxation</option>
+                                                <option value="adventure">Adventure</option>
+                                                <option value="food">Food & Wine</option>
+                                            </select>
+                                            <select id="manual-dest-budget" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="">All Budgets</option>
+                                                <option value="budget">Budget</option>
+                                                <option value="mid-range">Mid-range</option>
+                                                <option value="luxury">Luxury</option>
+                                            </select>
+                                        </div>
+                                        <button id="search-destinations" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 text-sm font-semibold mb-4">
+                                            Search Destinations
+                                        </button>
+                                        <div id="manual-destination-results" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <!-- Manual search results will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Accommodations Tab -->
+                                <div id="accommodations-tab" class="tab-content hidden">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-xl font-bold">Find Places to Stay</h3>
+                                        <div class="flex space-x-2">
+                                            <button id="ai-accommodations" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-semibold">
+                                                AI Suggest
+                                            </button>
+                                            <button id="manual-accommodations" class="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 text-sm font-semibold">
+                                                Manual Search
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- AI Accommodation Suggestions -->
+                                    <div id="ai-accommodation-section">
+                                        <p class="text-sm text-slate-600 mb-4">AI will suggest accommodations in your selected destination, or search manually below.</p>
+                                        <div id="accommodation-cards" class="space-y-3">
+                                            <!-- AI suggested accommodations will be populated here -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Manual Accommodation Search -->
+                                    <div id="manual-accommodation-section" class="hidden">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <input type="text" id="manual-acc-location" placeholder="Location/City..." class="p-2 border border-slate-300 rounded-lg text-sm">
+                                            <input type="text" id="manual-acc-name" placeholder="Hotel name..." class="p-2 border border-slate-300 rounded-lg text-sm">
+                                            <select id="manual-acc-price-min" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="">Min Price</option>
+                                                <option value="50">€50+</option>
+                                                <option value="100">€100+</option>
+                                                <option value="200">€200+</option>
+                                            </select>
+                                            <select id="manual-acc-price-max" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="">Max Price</option>
+                                                <option value="100">€100</option>
+                                                <option value="200">€200</option>
+                                                <option value="500">€500+</option>
+                                            </select>
+                                        </div>
+                                        <button id="search-accommodations" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 text-sm font-semibold mb-4">
+                                            Search Accommodations
+                                        </button>
+                                        <div id="manual-accommodation-results" class="space-y-3">
+                                            <!-- Manual search results will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Transportation Tab -->
+                                <div id="transportation-tab" class="tab-content hidden">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-xl font-bold">Plan Your Journey</h3>
+                                        <div class="flex space-x-2">
+                                            <button id="ai-transportation" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-semibold">
+                                                AI Suggest
+                                            </button>
+                                            <button id="manual-transportation" class="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 text-sm font-semibold">
+                                                Manual Search
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- AI Transportation Suggestions -->
+                                    <div id="ai-transportation-section">
+                                        <p class="text-sm text-slate-600 mb-4">AI will suggest transportation options for your selected route, or search manually below.</p>
+                                        <div id="transportation-cards" class="space-y-3">
+                                            <!-- AI suggested transportation will be populated here -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Manual Transportation Search -->
+                                    <div id="manual-transportation-section" class="hidden">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <input type="text" id="manual-from-location" placeholder="From (city)" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                            <input type="text" id="manual-to-location" placeholder="To (city)" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                            <select id="manual-transport-type" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="">All Types</option>
+                                                <option value="Flight">Flight</option>
+                                                <option value="Train">Train</option>
+                                                <option value="Bus">Bus</option>
+                                                <option value="Car">Car</option>
+                                            </select>
+                                            <input type="date" id="manual-departure-date" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                        </div>
+                                        <button id="search-transportation" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 text-sm font-semibold mb-4">
+                                            Search Transportation
+                                        </button>
+                                        <div id="manual-transportation-results" class="space-y-3">
+                                            <!-- Manual search results will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Itinerary Tab -->
+                                <div id="itinerary-tab" class="tab-content hidden">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-xl font-bold">Plan Your Days</h3>
+                                        <div class="flex space-x-2">
+                                            <button id="ai-itinerary" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-semibold">
+                                                AI Generate
+                                            </button>
+                                            <button id="manual-itinerary" class="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 text-sm font-semibold">
+                                                Manual Plan
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- AI Itinerary Generation -->
+                                    <div id="ai-itinerary-section">
+                                        <p class="text-sm text-slate-600 mb-4">AI will generate a personalized itinerary for your trip, or create one manually below.</p>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <select id="ai-itinerary-duration" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="1">1 Day</option>
+                                                <option value="3">3 Days</option>
+                                                <option value="5">5 Days</option>
+                                                <option value="7">7 Days</option>
+                                            </select>
+                                            <select id="ai-itinerary-focus" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="balanced">Balanced</option>
+                                                <option value="sightseeing">Sightseeing</option>
+                                                <option value="relaxation">Relaxation</option>
+                                                <option value="food">Food & Culture</option>
+                                            </select>
+                                        </div>
+                                        <button id="generate-ai-itinerary" class="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 text-sm font-semibold mb-4">
+                                            Generate AI Itinerary
+                                        </button>
+                                        <div id="ai-itinerary-content" class="space-y-3">
+                                            <!-- AI generated itinerary will be populated here -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Manual Itinerary Planning -->
+                                    <div id="manual-itinerary-section" class="hidden">
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium mb-2">Trip Duration (days)</label>
+                                            <select id="manual-itinerary-duration" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="1">1 Day</option>
+                                                <option value="3">3 Days</option>
+                                                <option value="5">5 Days</option>
+                                                <option value="7">7 Days</option>
+                                            </select>
+                                        </div>
+                                        <div id="manual-itinerary-builder" class="space-y-4">
+                                            <!-- Manual itinerary builder will be populated here -->
+                                        </div>
+                                        <button id="add-manual-day" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 text-sm font-semibold mb-4">
+                                            Add Day
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Tracking Tab -->
+                                <div id="tracking-tab" class="tab-content hidden">
+                                    <h3 class="text-xl font-bold mb-4">Real-time Journey Tracking</h3>
+                                    <div id="journey-status" class="bg-slate-50 p-4 rounded-lg mb-4">
+                                        <p class="text-sm text-slate-600">No active journey tracking</p>
+                                    </div>
+                                    <div id="delay-alerts" class="space-y-2">
+                                        <!-- Delay alerts will be populated here -->
+                                    </div>
+                                    <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                                        <p class="text-sm text-blue-800">Start tracking a journey by booking transportation in the Transportation tab.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
