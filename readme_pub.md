@@ -33,11 +33,16 @@ The **`.github/workflows/deploy.yml`** file contains the complete automation pip
    # The deploy.yml file should be placed here: .github/workflows/deploy.yml
    ```
 
-### Step 2: Configure GitHub Pages
+### Step 2: Configure GitHub Pages (REQUIRED)
+
+**⚠️ CRITICAL: This must be completed BEFORE the workflow will work**
 
 1. **Go to your repository** on GitHub
-2. **Navigate to Settings > Pages**
+2. **Navigate to Settings > Pages** (in the sidebar)
 3. **Under "Source"**, select **"GitHub Actions"**
+4. **Click "Save"** to confirm the configuration
+
+**Without this step, you'll get the error: "Failed to create deployment (status: 404)"**
 
 ### Step 3: Deploy via Pipeline
 
@@ -205,7 +210,12 @@ For example:
 
 ### Common Issues
 
-1. **Site not loading**
+1. **"Failed to create deployment (status: 404)" error**
+   - **SOLUTION**: Enable GitHub Pages in repository settings BEFORE pushing code
+   - Go to Settings > Pages > Source > Select "GitHub Actions" > Save
+   - This error occurs because Pages isn't configured yet
+
+2. **Site not loading**
    - Check if workflow completed successfully
    - Verify GitHub Pages is enabled in repository settings
    - Check repository is public (required for GitHub Pages)
