@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Odyssey – On-boarding</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght;700&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif;background:#F8F7F4;color:#333}
+    h1,h2,h3{font-family:'Playfair Display',serif}
+    .step-hidden{opacity:0;transform:translateY(20px);pointer-events:none}
+    .step-visible{opacity:1;transform:translateY(0);pointer-events:auto}
+    .progress-bar-fill{transition:width .5s ease}
+    .radio-checked+label{border-color:#8A9A5B;background:#F0F2E6}
+    .chart-container{position:relative;width:100%;max-width:450px;margin:auto;height:300px}
+    @media(min-width:768px){.chart-container{height:350px}}
+    .btn-primary{@apply bg-[#8A9A5B] text-white font-semibold py-3 px-6 rounded-lg shadow hover:bg-[#7a8a4f] transition}
+    .btn-secondary{@apply border-2 border-[#8A9A5B] text-[#8A9A5B] font-semibold py-3 px-6 rounded-lg hover:bg-[#8A9A5B] hover:text-white transition}
+  </style>
+</head>
+<body class="antialiased flex items-center justify-center min-h-screen p-4">
+
+<form id="onboarding-wrapper" class="w-full max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+  <!-- Header / Progress -->
+  <div class="px-8 pt-8 pb-4">
+    <div class="flex justify-between items-center mb-2">
+      <h3 id="step-title" class="text-lg font-semibold text-gray-700">Welcome to Odyssey</h3>
+      <p id="step-counter" class="text-sm text-gray-500">Step 1 of 6</p>
+    </div>
+    <div class="w-full bg-gray-200 rounded-full h-2">
+      <div id="progress-bar" class="bg-[#8A9A5B] h-2 rounded-full progress-bar-fill" style="width:16%"></div>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div id="steps-wrapper" class="relative px-8 pb-8 min-h-[460px]">
+
+    <!-- Step 1 : Welcome -->
+    <section id="step-1" class="step-visible text-center">
+      <div class="text-5xl mb-6">🌟</div>
+      <h1 class="text-4xl font-bold mb-4">Your Odyssey Begins</h1>
+      <p class="text-gray-600 mb-8 max-w-xl mx-auto">Transform goals, habits & daily challenges into an epic RPG. Let's craft your Future-Self.</p>
+      <button type="button" onclick="nextStep()" class="btn-primary">Begin Your Journey</button>
+    </section>
+
+    <!-- Step 2 : Name -->
+    <section id="step-2" class="step-hidden text-center">
+      <div class="text-5xl mb-6">👤</div>
+      <h2 class="text-3xl font-bold mb-4">Name Your Future Self</h2>
+      <p class="text-gray-600 mb-6">Every legend needs a name. What will you call the hero you're becoming?</p>
+      <input id="characterName" type="text" placeholder="e.g. Captain Vitality, The Oracle Master" class="w-full max-w-md mx-auto px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#8A9A5B] text-center text-lg">
+      <p class="text-xs text-gray-500 mt-3">Appears on your character sheet & achievements</p>
+    </section>
+
+    <!-- Step 3 : Stats Calibration -->
+    <section id="step-3" class="step-hidden">
+      <h2 class="text-3xl font-bold mb-2 text-center">Calibrate Core Stats</h2>
+      <p class="text-center text-gray-600 mb-6">Honest answers shape your starting character across four pillars.</p>
+      <div id="questions-container" class="space-y-6"></div>
+    </section>
+
+    <!-- Step 4 : Character Sheet -->
+    <section id="step-4" class="step-hidden">
+      <h2 class="text-3xl font-bold mb-2 text-center">Your Character Sheet</h2>
+      <p class="text-center text-gray-600 mb-6">Behold, <span id="characterNameDisplay" class="font-bold text-[#8A9A5B]">your Future Self</span>!</p>
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <div class="chart-container"><canvas id="statsChart"></canvas></div>
+        <div class="space-y-4">
+          <!-- Stat cards -->
+          <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+            <h3 class="font-bold text-green-700">💪 Vitality</h3>
+            <p class="text-sm text-gray-600">Health, fitness & energy</p>
+            <div class="mt-2 bg-gray-200 rounded-full h-2"><div id="vitality-bar" class="bg-green-500 h-2 rounded-full" style="width:0%"></div></div>
+          </div>
+          <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+            <h3 class="font-bold text-blue-700">🧠 Cognition</h3>
+            <p class="text-sm text-gray-600">Learning & mental acuity</p>
+            <div class="mt-2 bg-gray-200 rounded-full h-2"><div id="cognition-bar" class="bg-blue-500 h-2 rounded-full" style="width:0%"></div></div>
+          </div>
+          <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
+            <h3 class="font-bold text-purple-700">🛡️ Resilience</h3>
+            <p class="text-sm text-gray-600">Stress & emotional balance</p>
+            <div class="mt-2 bg-gray-200 rounded-full h-2"><div id="resilience-bar" class="bg-purple-500 h-2 rounded-full" style="width:0%"></div></div>
+          </div>
+          <div class="bg-amber-50 p-4 rounded-lg border-l-4 border-amber-500">
+            <h3 class="font-bold text-amber-700">💰 Prosperity</h3>
+            <p class="text-sm text-gray-600">Finance & long-term security</p>
+            <div class="mt-2 bg-gray-200 rounded-full h-2"><div id="prosperity-bar" class="bg-amber-500 h-2 rounded-full" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 5 : First Quest -->
+    <section id="step-5" class="step-hidden">
+      <div class="text-center mb-6">
+        <div class="text-5xl mb-4">🎯</div>
+        <h2 class="text-3xl font-bold mb-2">Your First Quest</h2>
+        <p class="text-gray-600">Choose a small, achievable mission to start levelling up.</p>
+      </div>
+      <div id="quest-suggestions" class="space-y-3 mb-4"></div>
+      <p class="text-center text-gray-500 text-sm mb-2">Or write your own:</p>
+      <input id="customQuest" type="text" placeholder="My custom quest..." class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#8A9A5B] text-center">
+    </section>
+
+    <!-- Step 6 : Completion -->
+    <section id="step-6" class="step-hidden text-center">
+      <div class="text-6xl mb-6">🎉</div>
+      <h1 class="text-4xl font-bold mb-4">You're All Set!</h1>
+      <p class="text-lg text-gray-600 mb-8">Your journey begins now, <span id="finalCharacterName" class="font-bold text-[#8A9A5B]">Navigator</span>!</p>
+      <button type="button" onclick="finishOnboarding()" class="btn-primary">🚀 Enter Odyssey</button>
+    </section>
+
+  </div>
+
+  <!-- Navigation -->
+  <div id="navigation-buttons" class="px-8 pb-6 pt-4 border-t border-gray-200 flex justify-between items-center">
+    <button id="back-button" type="button" onclick="prevStep()" class="btn-secondary">← Back</button>
+    <button id="next-button" type="button" onclick="nextStep()" class="btn-primary">Next →</button>
+  </div>
+
+</form>
+
+<!-- ======= ORIGINAL APP LOGIC (unchanged) ======= -->
+<script>
+/* --------------  DATA  -------------- */
+let currentStep = 1;
+const totalSteps  = 6;
+const userData    = { name:'', stats:{VITALITY:0,COGNITION:0,RESILIENCE:0,PROSPERITY:0}, quest:'' };
+let statsChart    = null;
+
+const stepTitles = [
+  "Welcome to Odyssey",
+  "Name Your Character",
+  "Calibrate Your Stats",
+  "Your Character Sheet",
+  "Choose Your First Quest",
+  "Ready to Go!"
+];
+
+const questions = [
+  {stat:'VITALITY',   text:'How consistently do you maintain physical health & energy?', options:[
+    {text:'Rarely exercise or focus on health',value:20},
+    {text:'Occasionally exercise but lack consistency',value:50},
+    {text:'Exercise 3-4× per week',value:80},
+    {text:'Daily strong fitness routine',value:100}]},
+  {stat:'COGNITION',  text:'How often do you challenge & develop your mind?', options:[
+    {text:'Rarely read or learn',value:20},
+    {text:'Occasionally read/learn',value:50},
+    {text:'Read/learn several × week',value:80},
+    {text:'Pursue learning daily',value:100}]},
+  {stat:'RESILIENCE', text:'How well do you handle stress & emotional balance?', options:[
+    {text:'Stress often overwhelms me',value:20},
+    {text:'Manage adequately',value:50},
+    {text:'Handle well with good coping',value:80},
+    {text:'Thrive under pressure',value:100}]},
+  {stat:'PROSPERITY', text:'How confident are you in financial habits & security?', options:[
+    {text:'Struggle with planning/saving',value:20},
+    {text:'Basic habits, room to improve',value:50},
+    {text:'Good discipline & planning',value:80},
+    {text:'Excel at management & planning',value:100}]}
+];
+
+/* --------------  RENDER  -------------- */
+function renderQuestions(){
+  const box = document.getElementById('questions-container');
+  box.innerHTML = questions.map((q,i)=>`
+    <div class="bg-gray-50 p-5 rounded-xl border border-gray-200">
+      <p class="font-semibold mb-3 text-gray-800">${q.text}</p>
+      <div class="grid grid-cols-1 gap-2">
+        ${q.options.map((o,oi)=>`
+          <div class="relative">
+            <input type="radio" id="q${i}_o${oi}" name="question_${i}" value="${o.value}" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer radio-checked">
+            <label for="q${i}_o${oi}" class="block w-full text-left p-3 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-[#8A9A5B] transition bg-white">${o.text}</label>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+/* --------------  UI FLOW  -------------- */
+function updateUI(){
+  /* visibility */
+  for(let i=1;i<=totalSteps;i++){
+    const el = document.getElementById(`step-${i}`);
+    el.classList.toggle('step-visible', i===currentStep);
+    el.classList.toggle('step-hidden', i!==currentStep);
+  }
+  /* progress */
+  const pct = (currentStep/totalSteps)*100;
+  document.getElementById('progress-bar').style.width = pct+'%';
+  document.getElementById('step-title').textContent  = stepTitles[currentStep-1];
+  document.getElementById('step-counter').textContent= `Step ${currentStep} of ${totalSteps}`;
+
+  /* nav buttons */
+  document.getElementById('back-button').style.display = currentStep===1 ? 'none':'inline-block';
+  document.getElementById('next-button').style.display = currentStep===totalSteps ? 'none':'inline-block';
+}
+
+function validateStep(){
+  if(currentStep===2){
+    const n=document.getElementById('characterName').value.trim();
+    if(!n){alert('Please enter a character name');return false}
+    userData.name=n;
+  }
+  if(currentStep===3){
+    const answered=document.querySelectorAll('#questions-container input[type="radio"]:checked').length;
+    if(answered<questions.length){alert('Please answer all questions');return false}
+    calculateStats();
+  }
+  if(currentStep===5){
+    const custom=document.getElementById('customQuest').value.trim();
+    const picked=document.querySelector('input[name="quest-suggestion"]:checked');
+    if(!picked && !custom){alert('Select or write your first quest');return false}
+    userData.quest= picked? picked.value : custom;
+  }
+  return true;
+}
+function calculateStats(){
+  questions.forEach((q,i)=>{
+    const sel=document.querySelector(`input[name="question_${i}"]:checked`);
+    if(sel) userData.stats[q.stat]=+sel.value;
+  });
+}
+function nextStep(){ if(validateStep() && currentStep<totalSteps){ currentStep++; afterStep(); }}
+function prevStep(){ if(currentStep>1){ currentStep--; updateUI(); }}
+function afterStep(){
+  if(currentStep===4) generateCharacterSheet();
+  if(currentStep===5) generateQuestSuggestions();
+  if(currentStep===6) document.getElementById('finalCharacterName').textContent=userData.name;
+  updateUI();
+}
+
+/* --------------  CHARACTER SHEET  -------------- */
+function generateCharacterSheet(){
+  document.getElementById('characterNameDisplay').textContent=userData.name;
+  ['vitality','cognition','resilience','prosperity'].forEach(s=>{
+    document.getElementById(s+'-bar').style.width=userData.stats[s.toUpperCase()]+'%';
+  });
+  const ctx=document.getElementById('statsChart').getContext('2d');
+  if(statsChart) statsChart.destroy();
+  statsChart=new Chart(ctx,{type:'radar',
+    data:{
+      labels:Object.keys(userData.stats),
+      datasets:[{label:userData.name,data:Object.values(userData.stats),
+        backgroundColor:'rgba(138,154,91,.25)',borderColor:'#8A9A5B',borderWidth:2,
+        pointBackgroundColor:'#8A9A5B',pointBorderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{r:{beginAtZero:true,max:100,grid:{color:'#e5e7eb'},pointLabels:{font:{size:14}}}}
+    }
+  });
+}
+
+/* --------------  QUEST SELECTION  -------------- */
+function generateQuestSuggestions(){
+  const low=Object.keys(userData.stats).reduce((a,b)=>userData.stats[a]<userData.stats[b]?a:b);
+  const map={
+    VITALITY:'Complete a 20-min workout or walk',
+    COGNITION:'Read for 30 min or learn something new',
+    RESILIENCE:'Practice 10 min meditation or deep breathing',
+    PROSPERITY:'Review & plan your budget for 15 min'
+  };
+  const sug=[map[low],'Tidy & organise your space','Connect with a friend','Plan a healthy meal for tomorrow'];
+  document.getElementById('quest-suggestions').innerHTML=sug.map((q,i)=>`
+    <div class="relative">
+      <input type="radio" id="q${i}" name="quest-suggestion" value="${q}" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer radio-checked">
+      <label for="q${i}" class="block w-full text-left p-3 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-[#8A9A5B] transition bg-white">${q}</label>
+    </div>`).join('');
+}
+
+/* --------------  FINISH  -------------- */
+function finishOnboarding(){
+  localStorage.setItem('odyssey-user-data',JSON.stringify(userData));
+  location.href='dashboard.html';
+}
+
+/* --------------  INIT  -------------- */
+document.addEventListener('DOMContentLoaded',()=>{
+  renderQuestions();
+  updateUI();
+});
+</script>
+</body>
+</html>
