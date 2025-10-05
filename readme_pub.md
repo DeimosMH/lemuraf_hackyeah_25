@@ -162,11 +162,11 @@ jobs:
 1. **Trigger**: Activates on push to main/master or manual trigger
 2. **Build Job**:
    - Checks out your code
-   - Configures GitHub Pages
+   - Creates optional CNAME file for custom domain
    - Uploads the `Odyssey/` folder as deployment artifact
 3. **Deploy Job**:
    - Takes the build artifact
-   - Publishes to GitHub Pages
+   - Automatically configures and publishes to GitHub Pages
    - Updates the live site
 
 ### Automatic Deployment
@@ -313,7 +313,8 @@ jobs:
     runs-on: ubuntu-latest                    # Run on GitHub's servers
     steps:
       - uses: actions/checkout@v4             # Get your code
-      - uses: actions/configure-pages@v4      # Setup Pages deployment
+      - run: echo "odyssey-demo.github.io" > Odyssey/CNAME
+        continue-on-error: true               # Create CNAME for custom domain
       - uses: actions/upload-pages-artifact@v3 # Upload site files
         with:
           path: './Odyssey'                   # Source directory

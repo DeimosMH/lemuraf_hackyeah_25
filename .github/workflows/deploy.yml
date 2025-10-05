@@ -19,31 +19,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Optimized single job for zero-build static sites
-  deploy:
-    environment:
-      name: github-pages
-      # Captures the final deployed URL for visibility in the GitHub UI
-      url: ${{ steps.deployment.outputs.page_url }}
+  # Build and deploy static site
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
-      
-      - name: Setup Pages Configuration
-        uses: actions/configure-pages@v5
-        
+        uses: actions/checkout@v4
+
       - name: Create CNAME file (Optional)
-        # Assuming the 'Odyssey' directory contains your static files
         run: echo "odyssey-demo.github.io" > Odyssey/CNAME
         continue-on-error: true
 
       - name: Upload Deployment Artifact
-        # Packages the static site content from the specified directory
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
           path: './Odyssey'
-          
+
+  # Deploy to GitHub Pages
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
