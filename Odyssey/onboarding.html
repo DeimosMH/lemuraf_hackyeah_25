@@ -41,6 +41,26 @@
             border-color: #8A9A5B;
             background-color: #F0F2E6;
         }
+        input[type="radio"]:checked + label {
+            border-color: #8A9A5B;
+            background-color: #F0F2E6;
+        }
+        input[type="radio"]:focus + label {
+            outline: 2px solid #8A9A5B;
+            outline-offset: 2px;
+        }
+        /* Ensure radio buttons work on mobile */
+        input[type="radio"] {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        @media (max-width: 768px) {
+            input[type="radio"] + label {
+                min-height: 48px;
+                display: flex;
+                align-items: center;
+            }
+        }
         .fade-in {
             animation: fadeIn 1s ease-in-out forwards;
         }
