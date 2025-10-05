@@ -37,25 +37,61 @@
         .progress-bar-fill {
             transition: width 0.5s ease-in-out;
         }
-        .radio-checked + label {
-            border-color: #8A9A5B;
+        /* Checkbox styling for Step 3 */
+        input[type="checkbox"]:checked + label {
             background-color: #F0F2E6;
+            border-color: #8A9A5B;
+            border-width: 2px;
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(138, 154, 91, 0.2);
+            position: relative;
         }
+        input[type="checkbox"]:checked + label::after {
+            content: '✓';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: #8A9A5B;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* Radio button styling for Step 5 */
         input[type="radio"]:checked + label {
-            border-color: #8A9A5B;
             background-color: #F0F2E6;
+            border-color: #8A9A5B;
+            border-width: 2px;
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(138, 154, 91, 0.2);
+            position: relative;
         }
+        input[type="radio"]:checked + label::after {
+            content: '●';
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            color: #8A9A5B;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input[type="checkbox"]:focus + label,
         input[type="radio"]:focus + label {
             outline: 2px solid #8A9A5B;
             outline-offset: 2px;
         }
-        /* Ensure radio buttons work on mobile */
-        input[type="radio"] {
+        /* Enhanced visual feedback for checked state */
+        input[type="checkbox"] + label {
+            transition: all 0.2s ease-in-out;
+        }
+        /* Ensure checkboxes work on mobile */
+        input[type="checkbox"] {
             min-height: 44px;
             min-width: 44px;
         }
         @media (max-width: 768px) {
-            input[type="radio"] + label {
+            input[type="checkbox"] + label {
                 min-height: 48px;
                 display: flex;
                 align-items: center;
@@ -118,7 +154,7 @@
 
                 <section id="step-3" class="step-transition step-hidden">
                     <h2 class="text-3xl font-bold mb-2 text-center">Calibrate Core Stats</h2>
-                    <p class="text-center text-gray-600 mb-8">Let's establish your baseline. Answer these questions to shape your character's starting attributes.</p>
+                    <p class="text-center text-gray-600 mb-8">Let's establish your baseline. Select all options that apply to shape your character's starting attributes.</p>
                     <div id="questions-container" class="space-y-8"></div>
                 </section>
 
@@ -218,8 +254,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         ${q.options.map((opt, optIndex) => `
                             <div class="relative">
-                                <input type="radio" id="q${index}_opt${optIndex}" name="question_${index}" value="${opt.value}" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer radio-checked">
-                                <label for="q${index}_opt${optIndex}" class="block w-full text-left p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#8A9A5B] transition-colors duration-200">${opt.text}</label>
+                                <input type="checkbox" id="q${index}_opt${optIndex}" name="question_${index}" value="${opt.value}" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                                <label for="q${index}_opt${optIndex}" class="block w-full text-left p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#8A9A5B] transition-all duration-200">${opt.text}</label>
                             </div>
                         `).join('')}
                     </div>
@@ -265,9 +301,15 @@
                 userData.name = name;
             }
             if (currentStep === 3) {
-                const answerCount = document.querySelectorAll('#step-3 input[type="radio"]:checked').length;
-                if (answerCount < questions.length) {
-                    alert('Please answer all questions to proceed.');
+                let allQuestionsAnswered = true;
+                questions.forEach((q, index) => {
+                    const checkedBoxes = document.querySelectorAll(`input[name="question_${index}"]:checked`);
+                    if (checkedBoxes.length === 0) {
+                        allQuestionsAnswered = false;
+                    }
+                });
+                if (!allQuestionsAnswered) {
+                    alert('Please select at least one option for each question to proceed.');
                     return false;
                 }
                 calculateStats();
@@ -286,8 +328,17 @@
 
         function calculateStats() {
             questions.forEach((q, index) => {
-                const selectedValue = document.querySelector(`input[name="question_${index}"]:checked`).value;
-                userData.stats[q.stat] = parseInt(selectedValue, 10);
+                const checkedBoxes = document.querySelectorAll(`input[name="question_${index}"]:checked`);
+                if (checkedBoxes.length > 0) {
+                    let totalValue = 0;
+                    checkedBoxes.forEach(checkbox => {
+                        totalValue += parseInt(checkbox.value, 10);
+                    });
+                    // Average the selected values for each stat
+                    userData.stats[q.stat] = Math.round(totalValue / checkedBoxes.length);
+                } else {
+                    userData.stats[q.stat] = 0;
+                }
             });
         }
 
@@ -368,8 +419,8 @@
             suggestions.forEach((quest, index) => {
                  suggestionsContainer.innerHTML += `
                     <div class="relative">
-                        <input type="radio" id="quest_opt${index}" name="quest-suggestion" value="${quest}" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer radio-checked">
-                        <label for="quest_opt${index}" class="block w-full text-left p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#8A9A5B] transition-colors duration-200">${quest}</label>
+                        <input type="radio" id="quest_opt${index}" name="quest-suggestion" value="${quest}" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        <label for="quest_opt${index}" class="block w-full text-left p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#8A9A5B] transition-all duration-200">${quest}</label>
                     </div>
                  `;
             });
