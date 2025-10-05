@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odyssey: Create Your Future Self</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #3D405B;
+        }
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+        .step-transition {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .step-hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            position: absolute;
+            pointer-events: none;
+        }
+        .step-visible {
+            opacity: 1;
+            transform: translateY(0);
+            position: static;
+            pointer-events: auto;
+        }
+        .progress-bar-fill {
+            transition: width 0.5s ease-in-out;
+        }
+        .radio-checked + label {
+            border-color: #8A9A5B;
+            background-color: #F0F2E6;
+        }
+        input[type="radio"]:checked + label {
+            border-color: #8A9A5B;
+            background-color: #F0F2E6;
+        }
+        input[type="radio"]:focus + label {
+            outline: 2px solid #8A9A5B;
+            outline-offset: 2px;
+        }
+        /* Ensure radio buttons work on mobile */
+        input[type="radio"] {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        @media (max-width: 768px) {
+            input[type="radio"] + label {
+                min-height: 48px;
+                display: flex;
+                align-items: center;
+            }
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <main class="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div class="p-8">
+            <div id="progress-container" class="mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 id="step-title" class="text-lg font-semibold text-gray-700">Welcome</h3>
+                    <p id="step-counter" class="text-sm text-gray-500">Step 1 of 6</p>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progress-bar" class="bg-[#8A9A5B] h-2 rounded-full progress-bar-fill" style="width: 16%"></div>
+                </div>
+            </div>
+
+            <div id="steps-wrapper" class="relative">
+
+                <section id="step-1" class="step-transition step-visible">
+                    <h1 class="text-4xl font-bold mb-4 text-center">Your Odyssey Begins</h1>
+                    <p class="text-center text-gray-600 mb-8">Welcome, Adventurer! You're about to transform your goals, habits, and daily challenges into an epic Role-Playing Game. Let's start by creating your "Future Self"—the hero of your life's story.</p>
+                    <div class="text-center">
+                        <button onclick="nextStep()" class="bg-[#8A9A5B] text-white font-bold py-3 px-8 rounded-lg hover:bg-[#718040] transition-colors duration-300 shadow-md">Begin Creation</button>
+                    </div>
+                </section>
+
+                <section id="step-2" class="step-transition step-hidden">
+                    <h2 class="text-3xl font-bold mb-6 text-center">Name Your Future Self</h2>
+                    <p class="text-center text-gray-600 mb-8">Every legend has a name. What will you call the hero you are striving to become?</p>
+                    <div>
+                        <input type="text" id="characterName" placeholder="E.g., The Balanced One, Captain Future" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8A9A5B]">
+                    </div>
+                </section>
+
+                <section id="step-3" class="step-transition step-hidden">
+                    <h2 class="text-3xl font-bold mb-2 text-center">Calibrate Core Stats</h2>
+                    <p class="text-center text-gray-600 mb-8">Let's establish your baseline. Answer these questions to shape your character's starting attributes.</p>
+                    <div id="questions-container" class="space-y-8"></div>
+                </section>
+
+                <section id="step-4" class="step-transition step-hidden">
+                    <h2 class="text-3xl font-bold mb-4 text-center">Your Character Sheet</h2>
+                    <p class="text-center text-gray-600 mb-8">Behold, <span id="characterNameDisplay" class="font-bold">your Future Self</span>! These are your starting stats. As you complete quests in your daily life, you will see them grow.</p>
+                    <div class="chart-container fade-in">
+                        <canvas id="statsChart"></canvas>
+                    </div>
+                </section>
+
+                <section id="step-5" class="step-transition step-hidden">
+                    <h2 class="text-3xl font-bold mb-4 text-center">Embark on Your First Quest</h2>
+                    <p class="text-center text-gray-600 mb-6">An Odyssey begins with a single step. Choose a small, achievable quest to start leveling up. What will it be?</p>
+                    <div id="quest-suggestions" class="space-y-4 mb-6"></div>
+                    <div>
+                        <input type="text" id="customQuest" placeholder="Or write your own first quest..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8A9A5B]">
+                    </div>
+                </section>
+
+                <section id="step-6" class="step-transition step-hidden">
+                     <div class="text-center">
+                        <div class="text-6xl mb-6">🎉</div>
+                        <h1 class="text-4xl font-bold mb-4">You're All Set!</h1>
+                        <p class="text-lg text-gray-600 mb-8">Your Odyssey has officially begun, <span id="finalCharacterName" class="font-bold">Adventurer</span>. Your dashboard is ready. Go forth and conquer your quests!</p>
+                        <button onclick="finishOnboarding()" class="bg-[#8A9A5B] text-white font-bold py-3 px-8 rounded-lg hover:bg-[#718040] transition-colors duration-300 shadow-md">Enter Odyssey</button>
+                    </div>
+                </section>
+
+            </div>
+
+            <div id="navigation-buttons" class="mt-8 pt-6 border-t border-gray-200 flex justify-between items-center">
+                <button id="back-button" onclick="prevStep()" class="text-gray-600 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors duration-300">Back</button>
+                <button id="next-button" onclick="nextStep()" class="bg-[#8A9A5B] text-white font-bold py-2 px-6 rounded-lg hover:bg-[#718040] transition-colors duration-300 shadow-md">Next</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 6;
+        const userData = {
+            name: '',
+            stats: { VITALITY: 0, COGNITION: 0, RESILIENCE: 0, PROSPERITY: 0 },
+            quest: ''
+        };
+        let statsChart = null;
+
+        const stepTitles = [
+            "Welcome",
+            "Character Name",
+            "Calibrate Stats",
+            "Character Sheet",
+            "First Quest",
+            "Ready to Go!"
+        ];
+
+        const questions = [
+            { stat: 'VITALITY', text: 'How many days a week do you typically engage in at least 20 minutes of physical activity?', options: [
+                { text: '0-1 days', value: 20 },
+                { text: '2-3 days', value: 50 },
+                { text: '4-5 days', value: 80 },
+                { text: '6-7 days', value: 100 }
+            ]},
+            { stat: 'COGNITION', text: 'How often do you dedicate time to learning a new skill or reading?', options: [
+                { text: 'Rarely', value: 20 },
+                { text: 'A few times a month', value: 50 },
+                { text: 'A few times a week', value: 80 },
+                { text: 'Almost daily', value: 100 }
+            ]},
+            { stat: 'RESILIENCE', text: 'How do you typically feel at the end of a stressful day?', options: [
+                { text: 'Drained and overwhelmed', value: 20 },
+                { text: 'Tired but okay', value: 50 },
+                { text: 'Able to unwind effectively', value: 80 },
+                { text: 'Calm and in control', value: 100 }
+            ]},
+            { stat: 'PROSPERITY', text: 'How confident are you in your current long-term financial plan?', options: [
+                { text: 'I don\'t have one', value: 20 },
+                { text: 'It\'s a work in progress', value: 50 },
+                { text: 'I feel fairly confident', value: 80 },
+                { text: 'I\'m very confident', value: 100 }
+            ]}
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderQuestions();
+            updateUI();
+        });
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+            questions.forEach((q, index) => {
+                const questionBlock = document.createElement('div');
+                questionBlock.innerHTML = `
+                    <p class="font-semibold mb-3 text-gray-800">${q.text}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        ${q.options.map((opt, optIndex) => `
+                            <div class="relative">
+                                <input type="radio" id="q${index}_opt${optIndex}" name="question_${index}" value="${opt.value}" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer radio-checked">
+                                <label for="q${index}_opt${optIndex}" class="block w-full text-left p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#8A9A5B] transition-colors duration-200">${opt.text}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(questionBlock);
+            });
+        }
+
+        function updateUI() {
+            for (let i = 1; i <= totalSteps; i++) {
+                const stepElement = document.getElementById(`step-${i}`);
+                if (i === currentStep) {
+                    stepElement.classList.remove('step-hidden');
+                    stepElement.classList.add('step-visible');
+                } else {
+                    stepElement.classList.remove('step-visible');
+                    stepElement.classList.add('step-hidden');
+                }
+            }
+
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('step-title').textContent = stepTitles[currentStep - 1];
+            document.getElementById('step-counter').textContent = `Step ${currentStep} of ${totalSteps}`;
+
+            document.getElementById('back-button').style.display = currentStep === 1 ? 'none' : 'inline-block';
+            document.getElementById('next-button').style.display = currentStep === totalSteps ? 'none' : 'inline-block';
+            document.getElementById('navigation-buttons').style.visibility = (currentStep === 1 || currentStep === totalSteps) ? 'hidden' : 'visible';
+             if (currentStep === 1) {
+                document.getElementById('progress-container').style.display = 'none';
+            } else {
+                document.getElementById('progress-container').style.display = 'block';
+            }
+        }
+
+        function validateStep() {
+            if (currentStep === 2) {
+                const name = document.getElementById('characterName').value.trim();
+                if (name === '') {
+                    alert('Please enter a name for your character.');
+                    return false;
+                }
+                userData.name = name;
+            }
+            if (currentStep === 3) {
+                const answerCount = document.querySelectorAll('#step-3 input[type="radio"]:checked').length;
+                if (answerCount < questions.length) {
+                    alert('Please answer all questions to proceed.');
+                    return false;
+                }
+                calculateStats();
+            }
+            if (currentStep === 5) {
+                const customQuest = document.getElementById('customQuest').value.trim();
+                const selectedQuest = document.querySelector('input[name="quest-suggestion"]:checked');
+                if (!selectedQuest && customQuest === '') {
+                    alert('Please select or write your first quest.');
+                    return false;
+                }
+                 userData.quest = selectedQuest ? selectedQuest.value : customQuest;
+            }
+            return true;
+        }
+
+        function calculateStats() {
+            questions.forEach((q, index) => {
+                const selectedValue = document.querySelector(`input[name="question_${index}"]:checked`).value;
+                userData.stats[q.stat] = parseInt(selectedValue, 10);
+            });
+        }
+
+        function generateCharacterSheet() {
+            document.getElementById('characterNameDisplay').textContent = userData.name;
+            const ctx = document.getElementById('statsChart').getContext('2d');
+
+            if (statsChart) {
+                statsChart.destroy();
+            }
+
+            statsChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(userData.stats),
+                    datasets: [{
+                        label: `${userData.name}'s Stats`,
+                        data: Object.values(userData.stats),
+                        backgroundColor: 'rgba(138, 154, 91, 0.2)',
+                        borderColor: '#8A9A5B',
+                        pointBackgroundColor: '#8A9A5B',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#8A9A5B'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(61, 64, 91, 0.2)' },
+                            grid: { color: 'rgba(61, 64, 91, 0.2)' },
+                            pointLabels: {
+                                font: {
+                                    size: 14,
+                                    family: 'Inter',
+                                    weight: '600'
+                                },
+                                color: '#3D405B'
+                            },
+                            ticks: {
+                                backdropColor: 'rgba(248, 247, 244, 0.7)',
+                                color: '#3D405B',
+                                stepSize: 25
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateQuestSuggestions() {
+            const suggestionsContainer = document.getElementById('quest-suggestions');
+            suggestionsContainer.innerHTML = '';
+            const lowestStat = Object.keys(userData.stats).reduce((a, b) => userData.stats[a] < userData.stats[b] ? a : b);
+
+            const questMap = {
+                VITALITY: "Go for a 20-minute walk today.",
+                COGNITION: "Read one chapter of a book.",
+                RESILIENCE: "Practice 5 minutes of mindful breathing.",
+                PROSPERITY: "Spend 15 minutes reviewing your budget."
+            };
+
+            const suggestions = [
+                questMap[lowestStat],
+                "Tidy one small area of your living space.",
+                "Drink a full glass of water right now."
+            ];
+
+            suggestions.forEach((quest, index) => {
+                 suggestionsContainer.innerHTML += `
+                    <div class="relative">
+                        <input type="radio" id="quest_opt${index}" name="quest-suggestion" value="${quest}" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer radio-checked">
+                        <label for="quest_opt${index}" class="block w-full text-left p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#8A9A5B] transition-colors duration-200">${quest}</label>
+                    </div>
+                 `;
+            });
+        }
+
+        function nextStep() {
+            if (!validateStep()) return;
+
+            if (currentStep < totalSteps) {
+                currentStep++;
+                if (currentStep === 4) generateCharacterSheet();
+                if (currentStep === 5) generateQuestSuggestions();
+                if (currentStep === 6) {
+                    document.getElementById('finalCharacterName').textContent = userData.name;
+                }
+                updateUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateUI();
+            }
+        }
+
+        function finishOnboarding() {
+            // Save onboarding completion and user data to localStorage
+            localStorage.setItem('odyssey-onboarding-completed', 'true');
+            localStorage.setItem('odyssey-user-data', JSON.stringify(userData));
+
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        }
+
+    </script>
+</body>
+</html>
