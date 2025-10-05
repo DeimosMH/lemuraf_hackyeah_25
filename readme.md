@@ -97,6 +97,7 @@ Odyssey is a life management platform that transforms daily productivity into an
 - **Visualization**: Chart.js for interactive charts and projections
 - **Typography**: Inter font family for optimal readability
 - **Architecture**: Multi-page application for better organization
+- **Deployment**: GitHub Actions pipeline for automated publishing
 
 ## Project Structure
 
