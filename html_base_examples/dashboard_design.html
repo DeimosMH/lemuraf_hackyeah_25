@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Odyssey: Character Sheet - The Life Navigation RPG</title>
+    <!-- Chosen Palette: Warm Neutral Amber -->
+    <!-- Application Structure Plan: The application is structured as a true single-page application (SPA) with tab-based navigation. All sections (Dashboard, Wallet, Simulator, etc.) are contained within the single HTML file and their visibility is toggled with JavaScript. This was chosen over the original mixed-navigation model to provide a seamless, integrated user experience without page reloads, which is central to the "Integrated Life OS" concept. The dashboard layout uses a two-column grid to separate the persistent 'Character Sheet' from the more dynamic daily tasks, improving focus and information hierarchy. -->
+    <!-- Visualization & Content Choices: 
+        - Character Stats: Report Info -> Core character attributes. Goal -> Inform/Compare. Viz -> Radar Chart (Chart.js). Interaction -> Hover for tooltips. Justification -> A radar chart is ideal for visualizing multi-variate data, allowing the user to quickly assess their character's strengths and weaknesses in a classic RPG style.
+        - XP Progress: Report Info -> Experience points. Goal -> Inform. Viz -> Styled HTML progress bar. Interaction -> None. Justification -> A simple, universally understood visual for tracking progress towards a goal.
+        - Habits/Quests/Events: Report Info -> Actionable daily tasks. Goal -> Organize/Inform. Viz -> Consolidated "Mission Log" using structured HTML/CSS list. Interaction -> Checkboxes for completion. Justification -> Grouping these related, time-sensitive items into a single module reduces clutter and creates a clear "call to action" for the user's day, reinforcing the gamified task management concept.
+        - Wallet: Report Info -> Financial data and booking options. Goal -> Inform/Organize. Viz -> Styled HTML cards and lists. Interaction -> Tab navigation. Justification -> Clear separation of financial data into cards for balance and payment methods improves scannability. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,14 +60,9 @@
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             transform: translateY(-2px);
         }
-        .tooltip-custom {
-            position: relative;
-            cursor: help;
-            border-bottom: 1px dotted #475569;
-        }
     </style>
 </head>
-<body class="text-slate-800">
+<body class="text-stone-800">
 
     <div id="app-container" class="min-h-screen">
 
@@ -67,15 +70,15 @@
             <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center py-4">
                     <div class="flex items-center space-x-2">
-                        <a href="index.html" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                        <a href="#" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
                             <span class="text-2xl font-bold text-amber-600">O</span>
                             <h1 class="text-xl font-bold text-stone-800">Odyssey</h1>
                         </a>
                     </div>
                     <div class="hidden md:flex items-center space-x-8">
-                        <button class="nav-link tab-button active font-semibold pb-2" data-tab="summary">Dashboard</button>
-                        <button class="nav-link tab-button text-stone-500 hover:text-amber-600 font-semibold pb-2" data-tab="simulator">Simulator</button>
+                        <button class="nav-link tab-button active font-semibold pb-2" data-tab="dashboard">Dashboard</button>
                         <button class="nav-link tab-button text-stone-500 hover:text-amber-600 font-semibold pb-2" data-tab="wallet">Wallet</button>
+                        <button class="nav-link tab-button text-stone-500 hover:text-amber-600 font-semibold pb-2" data-tab="simulator">Simulator</button>
                         <button class="nav-link tab-button text-stone-500 hover:text-amber-600 font-semibold pb-2" data-tab="events">Events</button>
                         <button class="nav-link tab-button text-stone-500 hover:text-amber-600 font-semibold pb-2" data-tab="routine">Routine</button>
                         <button class="nav-link tab-button text-stone-500 hover:text-amber-600 font-semibold pb-2" data-tab="accomplishments">Accomplishments</button>
@@ -87,9 +90,9 @@
                     </div>
                 </div>
                  <div id="mobile-menu" class="md:hidden hidden flex flex-col space-y-2 pb-4">
-                    <button class="nav-link tab-button active block text-left px-2 py-1 font-semibold" data-tab="summary">Dashboard</button>
-                    <button class="nav-link tab-button text-stone-500 hover:text-amber-600 block text-left px-2 py-1 font-semibold" data-tab="simulator">Simulator</button>
+                    <button class="nav-link tab-button active block text-left px-2 py-1 font-semibold" data-tab="dashboard">Dashboard</button>
                     <button class="nav-link tab-button text-stone-500 hover:text-amber-600 block text-left px-2 py-1 font-semibold" data-tab="wallet">Wallet</button>
+                    <button class="nav-link tab-button text-stone-500 hover:text-amber-600 block text-left px-2 py-1 font-semibold" data-tab="simulator">Simulator</button>
                     <button class="nav-link tab-button text-stone-500 hover:text-amber-600 block text-left px-2 py-1 font-semibold" data-tab="events">Events</button>
                     <button class="nav-link tab-button text-stone-500 hover:text-amber-600 block text-left px-2 py-1 font-semibold" data-tab="routine">Routine</button>
                     <button class="nav-link tab-button text-stone-500 hover:text-amber-600 block text-left px-2 py-1 font-semibold" data-tab="accomplishments">Accomplishments</button>
@@ -99,7 +102,7 @@
 
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-            <div id="summary-tab" class="tab-content">
+            <div id="dashboard-tab" class="tab-content">
                 <section>
                     <p class="text-stone-500 mb-8 max-w-4xl">The Dashboard is your <strong>Integrated Life OS</strong>, unifying career, health, and social achievements into a single gamified interface. Completing daily missions drives progression.</p>
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -172,6 +175,7 @@
                     </div>
                 </section>
             </div>
+
             <div id="wallet-tab" class="tab-content hidden">
                 <section>
                     <h2 class="text-3xl font-bold mb-2">Wallet: Integrated Commerce System</h2>
@@ -259,67 +263,155 @@
                     </div>
                 </section>
             </div>
+            
+            <div id="placeholder-tab" class="tab-content hidden">
+                <div class="text-center py-20">
+                    <h2 class="text-3xl font-bold mb-4 text-stone-700">Coming Soon!</h2>
+                    <p class="text-stone-500">This section is under construction. Check back later for updates.</p>
+                </div>
+            </div>
 
         </main>
     </div>
 
-    <script src="app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const tabButtons = document.querySelectorAll('.tab-button');
-            const tabContents = document.querySelectorAll('.tab-content');
-            const mainTabs = ['summary', 'wallet'];
+            const characterData = {
+                name: 'Alex',
+                level: 12,
+                gold: 150,
+                evasionPoints: 0,
+                xp: 450,
+                xpNext: 1000,
+                stats: {
+                    labels: ['Prosperity', 'Creativity', 'Wisdom', 'Vitality', 'Discipline', 'Social'],
+                    values: [65, 80, 70, 85, 60, 75]
+                },
+                quests: [
+                    { name: 'Morning Workout', description: 'Build physical resilience', completed: false, xp: 5 },
+                    { name: 'Read 30 mins', description: 'Expand knowledge daily', completed: true, xp: 5 },
+                    { name: 'Meditate 10 mins', description: 'Cultivate mental clarity', completed: false, xp: 5 },
+                    { name: 'Walk 5,000 steps', description: 'Public transport bonus', completed: false, xp: 10 }
+                ]
+            };
 
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const tabId = button.dataset.tab;
+            const populateUI = () => {
+                document.getElementById('char-level').innerHTML = `${characterData.name} <span class="text-sm font-medium text-stone-500">Lv. ${characterData.level}</span>`;
+                document.getElementById('evasion-points').textContent = characterData.evasionPoints;
+                document.getElementById('char-gold').textContent = characterData.gold;
+                const xpPercent = (characterData.xp / characterData.xpNext) * 100;
+                document.getElementById('xp-bar').style.width = `${xpPercent}%`;
+                document.getElementById('xp-text').textContent = `${characterData.xp} / ${characterData.xpNext} XP`;
 
-                    // Handle navigation to other pages for tabs not in this dashboard
-                    if (tabId === 'simulator') {
-                        window.location.href = 'simulator.html';
-                        return;
-                    } else if (tabId === 'events') {
-                        window.location.href = 'events.html';
-                        return;
-                    } else if (tabId === 'routine') {
-                        window.location.href = 'routine.html';
-                        return;
-                    } else if (tabId === 'accomplishments') {
-                        window.location.href = 'accomplishments.html';
-                        return;
-                    }
+                const questList = document.getElementById('quest-list');
+                questList.innerHTML = '';
+                characterData.quests.forEach(quest => {
+                    const questEl = document.createElement('div');
+                    questEl.className = 'flex items-center justify-between';
+                    questEl.innerHTML = `
+                        <div>
+                            <p class="font-semibold ${quest.completed ? 'text-stone-400 line-through' : ''}">${quest.name}</p>
+                            <p class="text-sm text-stone-500">${quest.description}</p>
+                        </div>
+                        <input type="checkbox" class="h-5 w-5 rounded text-amber-600 focus:ring-amber-500 border-stone-300" ${quest.completed ? 'checked' : ''}>
+                    `;
+                    questList.appendChild(questEl);
+                });
+            };
 
-                    tabContents.forEach(content => content.classList.add('hidden'));
-
-                    let targetTab;
-                    if (mainTabs.includes(tabId)) {
-                         targetTab = document.getElementById(`${tabId}-tab`);
-                    }
-
-                    if (targetTab) {
-                        targetTab.classList.remove('hidden');
-                    }
-
-                    tabButtons.forEach(btn => {
-                        btn.classList.remove('active');
-                        btn.classList.add('text-stone-500');
-                        btn.classList.remove('text-amber-600');
-                    });
-
-                    document.querySelectorAll(`.tab-button[data-tab="${tabId}"]`).forEach(activeBtn => {
-                       activeBtn.classList.add('active');
-                       activeBtn.classList.remove('text-stone-500');
-                       activeBtn.classList.add('text-amber-600');
-                    });
-
-                    const mobileMenu = document.getElementById('mobile-menu');
-                    if (!mobileMenu.classList.contains('hidden')) {
-                        mobileMenu.classList.add('hidden');
+            const createStatsChart = () => {
+                const ctx = document.getElementById('statsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: characterData.stats.labels,
+                        datasets: [{
+                            label: 'Character Stats',
+                            data: characterData.stats.values,
+                            backgroundColor: 'rgba(217, 119, 6, 0.2)',
+                            borderColor: 'rgba(217, 119, 6, 1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(217, 119, 6, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(217, 119, 6, 1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: '#e5e7eb' },
+                                angleLines: { color: '#e5e7eb' },
+                                pointLabels: { font: { size: 12 }, color: '#374151' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
                     }
                 });
-            });
+            };
+
+            const setupTabs = () => {
+                const tabButtons = document.querySelectorAll('.tab-button');
+                const tabContents = document.querySelectorAll('.tab-content');
+                const placeholderTab = document.getElementById('placeholder-tab');
+                const mainTabs = ['dashboard', 'wallet'];
+
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const tabId = button.dataset.tab;
+
+                        tabContents.forEach(content => content.classList.add('hidden'));
+
+                        let targetTab;
+                        if (mainTabs.includes(tabId)) {
+                             targetTab = document.getElementById(`${tabId}-tab`);
+                        } else {
+                            targetTab = placeholderTab;
+                        }
+                        
+                        if (targetTab) {
+                            targetTab.classList.remove('hidden');
+                        }
+
+                        tabButtons.forEach(btn => {
+                            btn.classList.remove('active');
+                            btn.classList.add('text-stone-500');
+                            btn.classList.remove('text-amber-600');
+                        });
+                        
+                        document.querySelectorAll(`.tab-button[data-tab="${tabId}"]`).forEach(activeBtn => {
+                           activeBtn.classList.add('active');
+                           activeBtn.classList.remove('text-stone-500');
+                           activeBtn.classList.add('text-amber-600');
+                        });
+
+                        const mobileMenu = document.getElementById('mobile-menu');
+                        if (!mobileMenu.classList.contains('hidden')) {
+                            mobileMenu.classList.add('hidden');
+                        }
+                    });
+                });
+            };
+            
+            const setupMobileMenu = () => {
+                const menuButton = document.getElementById('mobile-menu-button');
+                const mobileMenu = document.getElementById('mobile-menu');
+                menuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            populateUI();
+            createStatsChart();
+            setupTabs();
+            setupMobileMenu();
         });
     </script>
-
 </body>
 </html>
