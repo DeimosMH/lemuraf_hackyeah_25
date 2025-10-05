@@ -4,6 +4,8 @@
 
 Odyssey is a life management platform that transforms daily productivity into an engaging role-playing game experience. By integrating habit formation, predictive transportation, social connectivity, and long-term planning, Odyssey creates a comprehensive approach to personal development.
 
+target_tech_spec.pdf have technical documentation of how it can be implemented.
+
 ## What Makes Odyssey Different
 
 - **Gamified Productivity**: Transform mundane tasks into exciting quests with character progression
