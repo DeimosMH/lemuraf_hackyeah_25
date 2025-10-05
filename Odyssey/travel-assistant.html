@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odyssey: Travel Assistant - The Life Navigation RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            color: #0ea5e9;
+            border-bottom-color: #0ea5e9;
+        }
+        .chat-message {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tts-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .tts-button:hover {
+            transform: scale(1.05);
+        }
+        .booking-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .booking-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .structured-response h5 {
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        .structured-response ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .structured-response li {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .structured-response li:last-child {
+            border-bottom: none;
+        }
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #0ea5e9;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+        }
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #0ea5e9;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .loading-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .loading-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        .loading-text {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        .validating-text {
+            color: #f59e0b;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        .repairing-text {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="app-container" class="min-h-screen">
+
+        <header class="bg-white shadow-sm sticky top-0 z-10">
+            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <a href="index.html" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                            <span class="text-2xl font-bold text-sky-600">O</span>
+                            <h1 class="text-xl font-bold text-slate-800">Odyssey</h1>
+                        </a>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="dashboard.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="dashboard">Dashboard</a>
+                        <a href="simulator.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="simulator">Simulator</a>
+                        <a href="wallet.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="wallet">Wallet</a>
+                        <a href="events.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="events">Events</a>
+                        <a href="routine.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="routine">Routine</a>
+                        <a href="accomplishments.html" class="nav-link text-slate-600 hover:text-sky-500 border-b-2 border-transparent pb-1 font-semibold" data-section="accomplishments">Accomplishments</a>
+                        <a href="travel-assistant.html" class="nav-link text-sky-500 border-b-2 border-sky-500 pb-1 font-semibold" data-section="travel-assistant">Travel Assistant</a>
+                    </div>
+                    <div class="md:hidden">
+                         <button id="mobile-menu-button" class="text-slate-600 hover:text-sky-500">
+                             <span class="text-xl">☰</span>
+                         </button>
+                    </div>
+                </div>
+                 <div id="mobile-menu" class="md:hidden hidden flex flex-col space-y-2 pb-4">
+                    <a href="dashboard.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="dashboard">Dashboard</a>
+                    <a href="simulator.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="simulator">Simulator</a>
+                    <a href="wallet.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="wallet">Wallet</a>
+                    <a href="events.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="events">Events</a>
+                    <a href="routine.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="routine">Routine</a>
+                    <a href="accomplishments.html" class="nav-link text-slate-600 hover:text-sky-500 block px-2 py-1 font-semibold" data-section="accomplishments">Accomplishments</a>
+                    <a href="travel-assistant.html" class="nav-link text-sky-500 block px-2 py-1 font-semibold" data-section="travel-assistant">Travel Assistant</a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <section id="travel-assistant" class="app-section">
+                <h2 class="text-3xl font-bold mb-2">Travel Assistant: AI-Powered Journey Planning</h2>
+                <p class="text-slate-500 mb-8">Your personal AI travel companion suggests destinations, finds accommodations, books transport, and creates detailed itineraries with real-time tracking.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- AI Conversation Panel -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+                            <h3 class="text-xl font-bold mb-4 flex items-center">
+                                AI Travel Assistant
+                            </h3>
+                            <div id="chat-messages" class="h-64 overflow-y-auto mb-4 p-3 bg-slate-50 rounded-lg space-y-3">
+                                <div class="chat-message bg-sky-100 p-3 rounded-lg">
+                                    <p class="text-sm font-semibold text-sky-600">AI Assistant</p>
+                                    <p class="text-sm text-slate-700">Hello! I'm your AI travel assistant. Tell me about your dream destination or let me suggest something based on your preferences!</p>
+                                    <button class="tts-button text-xs bg-sky-500 text-white px-2 py-1 rounded mt-2 hover:bg-sky-600" onclick="speakText('Hello! I am your AI travel assistant. Tell me about your dream destination or let me suggest something based on your preferences!')">Speak</button>
+                                </div>
+                            </div>
+                            <!-- Loading indicator for LLM responses -->
+                            <div id="llm-loading" class="hidden">
+                                <div class="loading-container">
+                                    <div class="loading-spinner"></div>
+                                    <div class="loading-dots">
+                                        <div class="loading-dot"></div>
+                                        <div class="loading-dot"></div>
+                                        <div class="loading-dot"></div>
+                                    </div>
+                                    <div id="loading-status" class="loading-text">Thinking...</div>
+                                </div>
+                            </div>
+                            <!-- Loading indicator will be shown here -->
+                            <div class="flex space-x-2">
+                                <input type="text" id="user-input" placeholder="Tell me about your travel preferences..." class="flex-1 p-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                <button id="voice-input" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 text-sm font-semibold flex items-center justify-center">
+                                    <span id="voice-icon">Mic</span>
+                                </button>
+                                <button id="send-message" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-semibold">Send</button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Preferences -->
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-xl font-bold mb-4">Travel Preferences</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Budget Range</label>
+                                    <select id="budget-select" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                                        <option value="budget">Budget (€500-1000)</option>
+                                        <option value="mid-range">Mid-range (€1000-2500)</option>
+                                        <option value="luxury">Luxury (€2500+)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Travel Style</label>
+                                    <select id="style-select" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                                        <option value="relaxation">Relaxation & Wellness</option>
+                                        <option value="adventure">Adventure & Outdoor</option>
+                                        <option value="cultural">Cultural & Historical</option>
+                                        <option value="food">Food & Wine</option>
+                                    </select>
+                                </div>
+                                <button id="suggest-destination" class="w-full bg-emerald-500 text-white py-2 px-4 rounded-lg hover:bg-emerald-600 text-sm font-semibold">
+                                    Suggest Destination
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content Area -->
+                    <div class="lg:col-span-2">
+                        <!-- Tabbed Interface for Independent Function Access -->
+                        <div class="bg-white rounded-xl shadow-md">
+                            <div class="border-b border-slate-200">
+                                <nav class="flex space-x-8 px-6">
+                                    <button class="tab-button active py-4 px-2 border-b-2 border-sky-500 text-sky-600 font-semibold" data-tab="destinations">
+                                        Destinations
+                                    </button>
+                                    <button class="tab-button py-4 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold" data-tab="accommodations">
+                                        Accommodations
+                                    </button>
+                                    <button class="tab-button py-4 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold" data-tab="transportation">
+                                        Transportation
+                                    </button>
+                                    <button class="tab-button py-4 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold" data-tab="itinerary">
+                                        Itinerary
+                                    </button>
+                                    <button class="tab-button py-4 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold" data-tab="tracking">
+                                        Tracking
+                                    </button>
+                                </nav>
+                            </div>
+
+                            <div class="p-6">
+                                <!-- Destinations Tab -->
+                                <div id="destinations-tab" class="tab-content">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-xl font-bold">Destination Discovery</h3>
+                                        <div class="flex space-x-2">
+                                            <button id="ai-destinations" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-semibold">
+                                                AI Suggest
+                                            </button>
+                                            <button id="manual-destinations" class="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 text-sm font-semibold">
+                                                Manual Search
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- AI Destination Suggestions -->
+                                    <div id="ai-destination-section">
+                                        <p class="text-sm text-slate-600 mb-4">Let AI suggest destinations based on your preferences, or search manually below.</p>
+                                        <div id="destination-section" class="hidden">
+                                            <div id="destination-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <!-- AI suggested destination cards will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Manual Destination Search -->
+                                    <div id="manual-destination-section" class="hidden">
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                            <input type="text" id="manual-dest-name" placeholder="Destination name..." class="p-2 border border-slate-300 rounded-lg text-sm">
+                                            <select id="manual-dest-type" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="">All Types</option>
+                                                <option value="cultural">Cultural</option>
+                                                <option value="relaxation">Relaxation</option>
+                                                <option value="adventure">Adventure</option>
+                                                <option value="food">Food & Wine</option>
+                                            </select>
+                                            <select id="manual-dest-budget" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="">All Budgets</option>
+                                                <option value="budget">Budget</option>
+                                                <option value="mid-range">Mid-range</option>
+                                                <option value="luxury">Luxury</option>
+                                            </select>
+                                        </div>
+                                        <button id="search-destinations" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 text-sm font-semibold mb-4">
+                                            Search Destinations
+                                        </button>
+                                        <div id="manual-destination-results" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <!-- Manual search results will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Accommodations Tab -->
+                                <div id="accommodations-tab" class="tab-content hidden">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-xl font-bold">Find Places to Stay</h3>
+                                        <div class="flex space-x-2">
+                                            <button id="ai-accommodations" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-semibold">
+                                                AI Suggest
+                                            </button>
+                                            <button id="manual-accommodations" class="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 text-sm font-semibold">
+                                                Manual Search
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- AI Accommodation Suggestions -->
+                                    <div id="ai-accommodation-section">
+                                        <p class="text-sm text-slate-600 mb-4">AI will suggest accommodations in your selected destination, or search manually below.</p>
+                                        <div id="accommodation-section" class="hidden">
+                                            <div id="accommodation-results" class="space-y-3">
+                                                <!-- AI suggested accommodations will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Manual Accommodation Search -->
+                                    <div id="manual-accommodation-section" class="hidden">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <input type="text" id="manual-acc-location" placeholder="Location/City..." class="p-2 border border-slate-300 rounded-lg text-sm">
+                                            <input type="text" id="manual-acc-name" placeholder="Hotel name..." class="p-2 border border-slate-300 rounded-lg text-sm">
+                                            <select id="manual-acc-price-min" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="">Min Price</option>
+                                                <option value="50">€50+</option>
+                                                <option value="100">€100+</option>
+                                                <option value="200">€200+</option>
+                                            </select>
+                                            <select id="manual-acc-price-max" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="">Max Price</option>
+                                                <option value="100">€100</option>
+                                                <option value="200">€200</option>
+                                                <option value="500">€500+</option>
+                                            </select>
+                                        </div>
+                                        <button id="search-accommodations" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 text-sm font-semibold mb-4">
+                                            Search Accommodations
+                                        </button>
+                                        <div id="manual-accommodation-results" class="space-y-3">
+                                            <!-- Manual search results will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Transportation Tab -->
+                                <div id="transportation-tab" class="tab-content hidden">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-xl font-bold">Plan Your Journey</h3>
+                                        <div class="flex space-x-2">
+                                            <button id="ai-transportation" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-semibold">
+                                                AI Suggest
+                                            </button>
+                                            <button id="manual-transportation" class="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 text-sm font-semibold">
+                                                Manual Search
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- AI Transportation Suggestions -->
+                                    <div id="ai-transportation-section">
+                                        <p class="text-sm text-slate-600 mb-4">AI will suggest transportation options for your selected route, or search manually below.</p>
+                                        <div id="transport-section" class="hidden">
+                                            <div id="route-results" class="space-y-3">
+                                                <!-- AI suggested transportation will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Manual Transportation Search -->
+                                    <div id="manual-transportation-section" class="hidden">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <input type="text" id="manual-from-location" placeholder="From (city)" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                            <input type="text" id="manual-to-location" placeholder="To (city)" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                            <select id="manual-transport-type" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="">All Types</option>
+                                                <option value="Flight">Flight</option>
+                                                <option value="Train">Train</option>
+                                                <option value="Bus">Bus</option>
+                                                <option value="Car">Car</option>
+                                            </select>
+                                            <input type="date" id="manual-departure-date" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                        </div>
+                                        <button id="search-transportation" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 text-sm font-semibold mb-4">
+                                            Search Transportation
+                                        </button>
+                                        <div id="manual-transportation-results" class="space-y-3">
+                                            <!-- Manual search results will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Itinerary Tab -->
+                                <div id="itinerary-tab" class="tab-content hidden">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-xl font-bold">Plan Your Days</h3>
+                                        <div class="flex space-x-2">
+                                            <button id="ai-itinerary" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-semibold">
+                                                AI Generate
+                                            </button>
+                                            <button id="manual-itinerary" class="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 text-sm font-semibold">
+                                                Manual Plan
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- AI Itinerary Generation -->
+                                    <div id="ai-itinerary-section">
+                                        <p class="text-sm text-slate-600 mb-4">AI will generate a personalized itinerary for your trip, or create one manually below.</p>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <select id="itinerary-duration" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="1">1 Day</option>
+                                                <option value="3">3 Days</option>
+                                                <option value="5">5 Days</option>
+                                                <option value="7">7 Days</option>
+                                            </select>
+                                            <select id="ai-itinerary-focus" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="balanced">Balanced</option>
+                                                <option value="sightseeing">Sightseeing</option>
+                                                <option value="relaxation">Relaxation</option>
+                                                <option value="food">Food & Culture</option>
+                                            </select>
+                                        </div>
+                                        <button id="generate-itinerary" class="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 text-sm font-semibold mb-4">
+                                            Generate Itinerary
+                                        </button>
+                                        <div id="itinerary-section" class="hidden">
+                                            <div id="itinerary-content" class="space-y-3">
+                                                <!-- AI generated itinerary will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Manual Itinerary Planning -->
+                                    <div id="manual-itinerary-section" class="hidden">
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium mb-2">Trip Duration (days)</label>
+                                            <select id="manual-itinerary-duration" class="p-2 border border-slate-300 rounded-lg text-sm">
+                                                <option value="1">1 Day</option>
+                                                <option value="3">3 Days</option>
+                                                <option value="5">5 Days</option>
+                                                <option value="7">7 Days</option>
+                                            </select>
+                                        </div>
+                                        <div id="manual-itinerary-builder" class="space-y-4">
+                                            <!-- Manual itinerary builder will be populated here -->
+                                        </div>
+                                        <button id="add-manual-day" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 text-sm font-semibold mb-4">
+                                            Add Day
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Tracking Tab -->
+                                <div id="tracking-tab" class="tab-content hidden">
+                                    <h3 class="text-xl font-bold mb-4">Real-time Journey Tracking</h3>
+                                    <div id="journey-status" class="bg-slate-50 p-4 rounded-lg mb-4">
+                                        <p class="text-sm text-slate-600">No active journey tracking</p>
+                                    </div>
+                                    <div id="delay-alerts" class="space-y-2">
+                                        <!-- Delay alerts will be populated here -->
+                                    </div>
+                                    <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                                        <p class="text-sm text-blue-800">Start tracking a journey by booking transportation in the Transportation tab.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Restore original working travel assistant state and functions
+        const state = {
+            character: {
+                level: 12,
+                xp: 450,
+                xp_needed: 1000,
+                base_xp_increment: 500,
+                gold: 150,
+                evasionPoints: 0,
+                stats: {
+                    vitality: 70,
+                    cognition: 85,
+                    resilience: 60,
+                    prosperity: 50
+                }
+            },
+            travelAssistant: {
+                chatMessages: [
+                    { id: 1, sender: 'ai', text: "Hello! I'm your AI travel assistant. Tell me about your dream destination or let me suggest something based on your preferences!", timestamp: new Date() }
+                ],
+                destinations: [
+                    { id: 1, name: "Tokyo, Japan", type: "cultural", budget: "luxury", description: "Experience the perfect blend of ancient tradition and cutting-edge modernity", image: "🏯" },
+                    { id: 2, name: "Bali, Indonesia", type: "relaxation", budget: "mid-range", description: "Tropical paradise with beautiful beaches and spiritual wellness retreats", image: "🏝️" },
+                    { id: 3, name: "Swiss Alps", type: "adventure", budget: "luxury", description: "Majestic mountains, pristine lakes, and world-class skiing", image: "⛰️" },
+                    { id: 4, name: "Marrakech, Morocco", type: "cultural", budget: "budget", description: "Vibrant souks, ancient medinas, and exotic culinary adventures", image: "🕌" }
+                ],
+                accommodations: [
+                    { id: 1, name: "Luxury Resort & Spa", location: "Bali", price: "€250/night", rating: 4.8, amenities: ["Pool", "Spa", "Beach Access"], image: "🏨" },
+                    { id: 2, name: "Boutique Hotel", location: "Tokyo", price: "€180/night", rating: 4.6, amenities: ["City View", "Restaurant", "Gym"], image: "🏢" },
+                    { id: 3, name: "Mountain Chalet", location: "Swiss Alps", price: "€320/night", rating: 4.9, amenities: ["Fireplace", "Balcony", "Ski Storage"], image: "🏔️" }
+                ],
+                routes: [
+                    { id: 1, from: "New York", to: "Tokyo", duration: "14h 30m", price: "€850", type: "Flight", stops: 0 },
+                    { id: 2, from: "London", to: "Bali", duration: "16h 45m", price: "€720", type: "Flight", stops: 1 },
+                    { id: 3, from: "Paris", to: "Swiss Alps", duration: "2h 15m", price: "€180", type: "Train", stops: 0 }
+                ],
+                currentTrip: null,
+                itinerary: [],
+                preferences: {
+                    budget: 'mid-range',
+                    style: 'relaxation'
+                }
+            }
+        };
+
+        // Original working selectDestination function
+        function selectDestination(destId) {
+            let destination = state.travelAssistant.destinations.find(d => d.id === destId);
+
+            if (destination) {
+                state.travelAssistant.currentTrip = {
+                    destination: destination,
+                    status: 'planning',
+                    startDate: null,
+                    endDate: null
+                };
+                addChatMessage('ai', `Great choice! I've selected ${destination.name} for your trip. Let me help you find accommodations and plan your transportation.`);
+                document.getElementById('destination-section').classList.remove('hidden');
+                document.getElementById('accommodation-section').classList.remove('hidden');
+                renderAccommodations();
+            }
+        }
+
+        function addChatMessage(sender, text) {
+            const chatContainer = document.getElementById('chat-messages');
+            if (chatContainer) {
+                const msgEl = document.createElement('div');
+                msgEl.className = `chat-message ${sender === 'ai' ? 'bg-sky-100' : 'bg-emerald-100'} p-3 rounded-lg`;
+                const ttsButton = sender === 'ai' ? `<button class="tts-button text-xs bg-sky-500 text-white px-2 py-1 rounded mt-2 hover:bg-sky-600" onclick="speakText('${text.replace(/'/g, "\\'")}')">🔊 Speak</button>` : '';
+                msgEl.innerHTML = `
+                    <p class="text-sm font-semibold ${sender === 'ai' ? 'text-sky-600' : 'text-emerald-600'}">${sender === 'ai' ? 'AI Assistant' : 'You'}</p>
+                    <p class="text-sm text-slate-700">${text}</p>
+                    ${ttsButton}
+                `;
+                chatContainer.appendChild(msgEl);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+
+        function renderAccommodations() {
+            const container = document.getElementById('accommodation-results');
+            if (container) {
+                container.innerHTML = '';
+                state.travelAssistant.accommodations.forEach(acc => {
+                    const card = document.createElement('div');
+                    card.className = 'booking-card bg-white p-4 rounded-xl shadow-md border';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="font-bold">${acc.name}</h4>
+                                <p class="text-sm text-slate-600">${acc.location}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-sky-600">${acc.price}</p>
+                                <div class="flex items-center">
+                                    <span class="text-yellow-500">★</span>
+                                    <span class="text-sm ml-1">${acc.rating}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            ${acc.amenities.map(amenity => `<span class="text-xs bg-slate-100 px-2 py-1 rounded">${amenity}</span>`).join('')}
+                        </div>
+                        <button class="book-accommodation w-full bg-emerald-500 text-white py-2 px-4 rounded-lg hover:bg-emerald-600 text-sm font-semibold" data-acc-id="${acc.id}">
+                            Book Now
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+
+                container.querySelectorAll('.book-accommodation').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        const accId = parseInt(e.target.dataset.accId);
+                        bookAccommodation(accId);
+                    });
+                });
+            }
+        }
+
+        function bookAccommodation(accId) {
+            const accommodation = state.travelAssistant.accommodations.find(a => a.id === accId);
+            if (accommodation) {
+                addChatMessage('ai', `Excellent choice! I've noted your interest in ${accommodation.name}. In a real implementation, this would redirect you to a booking site. Let me know when you're ready to proceed with transportation planning.`);
+                if (state.travelAssistant.currentTrip) {
+                    state.travelAssistant.currentTrip.accommodation = accommodation;
+                    state.travelAssistant.currentTrip.status = 'accommodation_selected';
+                }
+                document.getElementById('transport-section').classList.remove('hidden');
+                renderRoutes();
+            }
+        }
+
+        function renderRoutes() {
+            const container = document.getElementById('route-results');
+            if (container) {
+                container.innerHTML = '';
+                state.travelAssistant.routes.forEach(route => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-4 rounded-xl shadow-md border';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="font-bold">${route.from} → ${route.to}</h4>
+                                <p class="text-sm text-slate-600">${route.type} • ${route.duration}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-emerald-600">${route.price}</p>
+                                <p class="text-sm text-slate-500">${route.stops} stops</p>
+                            </div>
+                        </div>
+                        <button class="book-route w-full bg-sky-500 text-white py-2 px-4 rounded-lg hover:bg-sky-600 text-sm font-semibold" data-route-id="${route.id}">
+                            Book Transportation
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+
+                container.querySelectorAll('.book-route').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        const routeId = parseInt(e.target.dataset.routeId);
+                        bookRoute(routeId);
+                    });
+                });
+            }
+        }
+
+        function bookRoute(routeId) {
+            const route = state.travelAssistant.routes.find(r => r.id === routeId);
+            if (route) {
+                addChatMessage('ai', `Great choice! I've noted your selection of ${route.type.toLowerCase()} from ${route.from} to ${route.to}. In a real implementation, this would redirect you to a ticketing site.`);
+                if (state.travelAssistant.currentTrip) {
+                    state.travelAssistant.currentTrip.transportation = route;
+                    state.travelAssistant.currentTrip.status = 'transportation_selected';
+                }
+                document.getElementById('itinerary-section').classList.remove('hidden');
+                generateItinerary();
+            }
+        }
+
+        function generateItinerary() {
+            const duration = parseInt(document.getElementById('itinerary-duration').value);
+            const itinerary = [];
+
+            for (let day = 1; day <= duration; day++) {
+                const dayPlan = {
+                    day: day,
+                    activities: [
+                        { time: "09:00", activity: "Breakfast at hotel", type: "meal" },
+                        { time: "10:00", activity: "Morning sightseeing", type: "attraction" },
+                        { time: "13:00", activity: "Lunch break", type: "meal" },
+                        { time: "14:00", activity: "Afternoon exploration", type: "attraction" },
+                        { time: "19:00", activity: "Dinner and evening relaxation", type: "meal" }
+                    ]
+                };
+                itinerary.push(dayPlan);
+            }
+
+            state.travelAssistant.itinerary = itinerary;
+            renderItinerary();
+        }
+
+        function renderItinerary() {
+            const container = document.getElementById('itinerary-content');
+            if (container) {
+                container.innerHTML = '';
+                state.travelAssistant.itinerary.forEach(day => {
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'bg-slate-50 p-4 rounded-lg';
+                    dayEl.innerHTML = `
+                        <h4 class="font-bold text-lg mb-3">Day ${day.day}</h4>
+                        <div class="space-y-2">
+                            ${day.activities.map(activity => `
+                                <div class="flex justify-between items-center py-2 border-b border-slate-200 last:border-b-0">
+                                    <div>
+                                        <p class="font-medium">${activity.activity}</p>
+                                        <p class="text-sm text-slate-500 capitalize">${activity.type}</p>
+                                    </div>
+                                    <span class="text-sm font-mono text-slate-600">${activity.time}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    container.appendChild(dayEl);
+                });
+            }
+        }
+
+        // Make selectDestination globally available
+        window.selectDestination = selectDestination;
+
+        // Text-to-speech function
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                utterance.volume = 0.8;
+                speechSynthesis.speak(utterance);
+            } else {
+                console.warn('Text-to-speech not supported in this browser');
+            }
+        }
+
+        // Original renderDestinations function
+        function renderDestinations() {
+            const container = document.getElementById('destination-cards');
+            if (container) {
+                container.innerHTML = '';
+                state.travelAssistant.destinations.forEach(dest => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-4 rounded-xl shadow-md border-2 border-transparent hover:border-sky-300 cursor-pointer transition-all duration-200';
+                    card.innerHTML = `
+                        <div class="text-4xl mb-2">${dest.image || '🌍'}</div>
+                        <h4 class="font-bold text-lg">${dest.name}</h4>
+                        <p class="text-sm text-slate-600 mb-2">${dest.description}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs bg-slate-100 px-2 py-1 rounded-full capitalize">${dest.type}</span>
+                            <span class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full capitalize">${dest.budget}</span>
+                        </div>
+                        <button class="select-destination w-full mt-3 bg-sky-500 text-white py-2 px-4 rounded-lg hover:bg-sky-600 text-sm font-semibold" data-dest-id="${dest.id}">
+                            Select Destination
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+
+                // Re-add event listeners
+                container.querySelectorAll('.select-destination').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        const destId = parseInt(e.target.dataset.destId);
+                        selectDestination(destId);
+                    });
+                });
+
+                document.getElementById('destination-section').classList.remove('hidden');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            // Handle internal tab switching
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+                    const targetTab = document.getElementById(`${tabId}-tab`);
+
+                    if (targetTab) {
+                        // Hide all tab contents
+                        tabContents.forEach(content => content.classList.add('hidden'));
+
+                        // Show the target tab content
+                        targetTab.classList.remove('hidden');
+
+                        // Update active state for tab buttons
+                        tabButtons.forEach(btn => {
+                            btn.classList.remove('active', 'text-sky-600', 'border-sky-500');
+                            btn.classList.add('text-slate-500', 'border-transparent');
+                        });
+
+                        // Set active state for clicked button
+                        button.classList.add('active', 'text-sky-600', 'border-sky-500');
+                        button.classList.remove('text-slate-500', 'border-transparent');
+                    }
+                });
+            });
+
+            // Handle destination functionality
+            const suggestDestinationBtn = document.getElementById('suggest-destination');
+            const aiDestinationsBtn = document.getElementById('ai-destinations');
+            const manualDestinationsBtn = document.getElementById('manual-destinations');
+            const searchDestinationsBtn = document.getElementById('search-destinations');
+
+            // Toggle between AI and manual destination sections
+            if (aiDestinationsBtn && manualDestinationsBtn) {
+                aiDestinationsBtn.addEventListener('click', () => {
+                    document.getElementById('ai-destination-section').classList.remove('hidden');
+                    document.getElementById('manual-destination-section').classList.add('hidden');
+                    aiDestinationsBtn.classList.add('bg-sky-600');
+                    aiDestinationsBtn.classList.remove('bg-sky-500');
+                    manualDestinationsBtn.classList.add('bg-slate-500');
+                    manualDestinationsBtn.classList.remove('bg-slate-600');
+                });
+
+                manualDestinationsBtn.addEventListener('click', () => {
+                    document.getElementById('manual-destination-section').classList.remove('hidden');
+                    document.getElementById('ai-destination-section').classList.add('hidden');
+                    manualDestinationsBtn.classList.add('bg-slate-600');
+                    manualDestinationsBtn.classList.remove('bg-slate-500');
+                    aiDestinationsBtn.classList.add('bg-sky-500');
+                    aiDestinationsBtn.classList.remove('bg-sky-600');
+                });
+            }
+
+            // Handle suggest destination button
+            if (suggestDestinationBtn) {
+                suggestDestinationBtn.addEventListener('click', () => {
+                    const budgetSelect = document.getElementById('budget-select');
+                    const styleSelect = document.getElementById('style-select');
+
+                    if (budgetSelect && styleSelect) {
+                        const budget = budgetSelect.value;
+                        const style = styleSelect.value;
+
+                        // Update preferences in state
+                        state.travelAssistant.preferences.budget = budget;
+                        state.travelAssistant.preferences.style = style;
+
+                        // Show loading state
+                        suggestDestinationBtn.innerHTML = 'Finding destinations...';
+                        suggestDestinationBtn.disabled = true;
+
+                        // Use the original renderDestinations function
+                        setTimeout(() => {
+                            renderDestinations();
+                            addChatMessage('ai', `Here are my top destination suggestions for your ${style} style and ${budget} budget!`);
+
+                            // Reset button
+                            suggestDestinationBtn.innerHTML = 'Suggest Destination';
+                            suggestDestinationBtn.disabled = false;
+                        }, 1500);
+                    }
+                });
+            }
+
+            // Handle generate itinerary button
+            const generateItineraryBtn = document.getElementById('generate-itinerary');
+            if (generateItineraryBtn) {
+                generateItineraryBtn.addEventListener('click', () => {
+                    generateItinerary();
+                    addChatMessage('ai', 'Perfect! I\'ve generated a personalized itinerary for your trip. You can adjust the duration and I\'ll customize it further.');
+                });
+            }
+
+            // Handle search destinations button
+            if (searchDestinationsBtn) {
+                searchDestinationsBtn.addEventListener('click', () => {
+                    const destName = document.getElementById('manual-dest-name').value;
+                    const destType = document.getElementById('manual-dest-type').value;
+                    const destBudget = document.getElementById('manual-dest-budget').value;
+
+                    if (destName || destType || destBudget) {
+                        // Show loading state
+                        searchDestinationsBtn.innerHTML = 'Searching...';
+                        searchDestinationsBtn.disabled = true;
+
+                        // Simulate search results
+                        setTimeout(() => {
+                            const resultsContainer = document.getElementById('manual-destination-results');
+                            if (resultsContainer) {
+                                resultsContainer.innerHTML = `
+                                    <div class="bg-white p-4 rounded-lg border border-slate-200">
+                                        <h4 class="font-semibold text-lg mb-2">🔍 Search Results</h4>
+                                        <p class="text-sm text-slate-600 mb-2">Found destinations matching your criteria</p>
+                                        <div class="space-y-2">
+                                            <div class="p-3 bg-slate-50 rounded flex justify-between items-center">
+                                                <div>
+                                                    <div class="font-semibold">Tokyo, Japan</div>
+                                                    <div class="text-sm text-slate-500">Cultural destination • ${destBudget || 'Mid-range'} budget</div>
+                                                </div>
+                                                <button class="select-destination bg-sky-500 text-white px-3 py-1 rounded text-sm hover:bg-sky-600" data-dest-id="3">Select</button>
+                                            </div>
+                                            <div class="p-3 bg-slate-50 rounded flex justify-between items-center">
+                                                <div>
+                                                    <div class="font-semibold">Paris, France</div>
+                                                    <div class="text-sm text-slate-500">Cultural destination • ${destBudget || 'Mid-range'} budget</div>
+                                                </div>
+                                                <button class="select-destination bg-sky-500 text-white px-3 py-1 rounded text-sm hover:bg-sky-600" data-dest-id="4">Select</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+
+                                // Re-add event listeners for select buttons
+                                resultsContainer.querySelectorAll('.select-destination').forEach(btn => {
+                                    btn.addEventListener('click', e => {
+                                        const destId = parseInt(e.target.dataset.destId);
+                                        if (window.selectDestination) {
+                                            window.selectDestination(destId);
+                                        }
+                                    });
+                                });
+                            }
+
+                            // Reset button
+                            searchDestinationsBtn.innerHTML = 'Search Destinations';
+                            searchDestinationsBtn.disabled = false;
+                        }, 1500);
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
